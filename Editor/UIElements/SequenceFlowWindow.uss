@@ -1,0 +1,106 @@
+Toolbar {
+    padding: 4px 3px;
+    height: 35px;
+}
+
+#collapse-button {
+    display: none;
+}
+
+#SequenceFlowObject {
+    font-size: 110%;
+    height: 20px;
+    margin-top: 3px;
+}
+
+GridBackground {
+    --grid-background-color: #282828;
+    --line-color: rgba(193,196,192,0.1);
+    --thick-line-color: rgba(193,196,192,0.1);
+    --spacing: 20;
+}
+
+.TextArea TextInput {
+    -unity-text-align: upper-left;
+    white-space: normal;
+    overflow: visible;
+    padding: 2px;
+    min-height: 49px;
+    max-width: 222px;
+}
+
+SequenceFlowGraphView #divider.horizontal {
+    display: none;
+}
+
+#top {
+    height: 22px;
+    background-color: rgba(0, 0, 0, 0);
+    border-top-width: 1px;
+    border-top-color: rgba(0, 0, 0, 0.3);
+    border-bottom-width: 1px;
+    border-bottom-color: rgba(0, 0, 0, 0.3);
+}
+
+#top #input {
+    max-width: 80px;
+}
+
+#top #divider {
+    flex-grow: 1;
+    background-color: rgba(0, 0, 0, 0);
+}
+
+#top #output {
+    max-width: 80px;
+}
+
+#title-button-container {
+    /* padding-top: 4px; */
+    /* padding-right: 4px; */
+    padding: 0;
+}
+
+#title-button-container Button {
+    font-size: 16px;
+    background-color: transparent;
+    margin-top: 8px;
+}
+
+.DetailViewButton {
+    color: rgba(0, 185, 145, 1);
+    padding: 0;
+    /* border-radius: 0; */
+    /* border-top-right-radius: 5px; */
+    /* border-bottom-left-radius: 5px; */
+    border-width: 0;
+    height: 20px;
+    width: 20px;
+    display: none;
+}
+
+.port.has-conditions {
+    --port-color: rgba(155, 255, 155, 1);
+}
+
+.port.has-no-conditions {
+    /* --port-color: rgba(205, 155, 0, .8); */
+    --port-color: rgba(175, 175, 175, .8);
+}
+
+.port.output {
+    --port-color: rgba(175, 175, 175, .8);
+}
+
+.smaller #input,
+.smaller #output {
+    align-self: center;
+}
+
+.smaller .port {
+    padding: 0;
+}
+
+SearchWindow, SearchWindow * {
+    background: red;
+}
