@@ -1,0 +1,18 @@
+image: node:14-buster
+stages:
+  - login
+  - publish
+  - logout
+login:
+  stage: login
+  script:
+    - expect -f /opt/login
+publish:
+  stage: publish
+  allow_failure: true
+  script:
+    - bash /opt/publish
+logout:
+  stage: logout
+  script:
+    - bash /opt/logout
