@@ -16,11 +16,19 @@ namespace MT.Packages.SequenceFlow
 		public string destinationGUID;
 
 		public int GetStatementIndex() {
+#if MT_PACKAGES_PROJECT
+			return -1;
+#else
 			return sequenceFlow.transitions.IndexOf(this);
+#endif
 		}
 
 		public Core.Statement GetStatement() {
+#if MT_PACKAGES_PROJECT
+			return null;
+#else
 			return sequenceFlow.sequenceFlowObject.transitionStatements[GetStatementIndex()];
+#endif
 		}
 
 #if UNITY_EDITOR

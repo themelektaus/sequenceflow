@@ -36,22 +36,41 @@ namespace MT.Packages.SequenceFlow
 		}
 
 		public int GetSequenceIndex() {
+#if MT_PACKAGES_PROJECT
+			return -1;
+#else
 			return sequenceFlow.states.IndexOf(this);
+#endif
 		}
 
 		public Sequence GetSequence() {
+#if MT_PACKAGES_PROJECT
+			return null;
+#else
 			return sequenceFlow.sequenceFlowObject.stateSequences[GetSequenceIndex()];
+#endif
 		}
 
 		public IEnumerable<Transition> GetInputTransitions() {
+#if MT_PACKAGES_PROJECT
+			yield break;
+#else
 			return sequenceFlow.transitions.Where(x => x.destination == this).OrderByDescending(x => x.source.GetY());
+#endif
 		}
 
 		public IEnumerable<Transition> GetOutputTransitions() {
+#if MT_PACKAGES_PROJECT
+			yield break;
+#else
 			return sequenceFlow.transitions.Where(x => x.source == this);
+#endif
 		}
 
 		public State GetNext(EventSystem.EventArgs e) {
+#if MT_PACKAGES_PROJECT
+			return null;
+#else
 			var transitions = sequenceFlow.transitions.Where(t => {
 				if (t.source == this) {
 					var statement = t.GetStatement();
@@ -73,6 +92,7 @@ namespace MT.Packages.SequenceFlow
 				return transitions[0].destination;
 			}
 			return transitions.OrderBy(t => t.destination.GetY()).FirstOrDefault().destination;
+#endif
 		}
 
 #if UNITY_EDITOR

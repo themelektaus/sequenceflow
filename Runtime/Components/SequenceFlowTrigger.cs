@@ -34,7 +34,9 @@ namespace MT.Packages.SequenceFlow
 				foreach (var parameter in parameters) {
 					onEnterInterpreter.parameters.Set(parameter);
 				}
+#if !MT_PACKAGES_PROJECT
 				onEnterInterpreter.Perform(collision.transform, null);
+#endif
 			}
 			if (!activators.Contains(collision)) {
 				activators.Add(collision);
@@ -57,7 +59,9 @@ namespace MT.Packages.SequenceFlow
 				foreach (var parameter in parameters) {
 					onExitInterpreter.parameters.Set(parameter);
 				}
+#if !MT_PACKAGES_PROJECT
 				onExitInterpreter.Perform(collision.transform, null);
+#endif
 			}
 		}
 	}

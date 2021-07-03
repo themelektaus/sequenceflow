@@ -1,6 +1,6 @@
-﻿using System;
+﻿#if !MT_PACKAGES_PROJECT
+using System;
 using System.Collections.Generic;
-//using System.Linq;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
@@ -157,3 +157,4 @@ namespace MT.Packages.SequenceFlow.Editor.UIElements
 		}
 	}
 }
+#endif

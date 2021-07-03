@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿#if !MT_PACKAGES_PROJECT
+using System.Linq;
 using UnityEditor;
 using UnityEngine;
 
@@ -447,3 +448,4 @@ namespace MT.Packages.SequenceFlow.Editor
 		}
 	}
 }
+#endif

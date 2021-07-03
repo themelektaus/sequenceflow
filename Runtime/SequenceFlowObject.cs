@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿#if !MT_PACKAGES_PROJECT
+using System.Collections.Generic;
 using System.Linq;
 using OldName = UnityEngine.Serialization.FormerlySerializedAsAttribute;
 
@@ -66,3 +67,4 @@ namespace MT.Packages.SequenceFlow
 #endif
 	}
 }
+#endif

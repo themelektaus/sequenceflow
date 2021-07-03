@@ -1,4 +1,5 @@
-﻿using UnityEditor;
+﻿#if !MT_PACKAGES_PROJECT
+using UnityEditor;
 using UnityEditor.Experimental.GraphView;
 using UnityEngine;
 using UnityEngine.UIElements;
@@ -81,3 +82,4 @@ namespace MT.Packages.SequenceFlow.Editor.UIElements
 		}
 	}
 }
+#endif

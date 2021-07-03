@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿#if !MT_PACKAGES_PROJECT
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -76,3 +77,4 @@ namespace MT.Packages.SequenceFlow
         }
     }
 }
+#endif

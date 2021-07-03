@@ -1,4 +1,4 @@
-﻿using MT.Packages.TenYears;
+﻿#if !MT_PACKAGES_PROJECT
 using System.Collections;
 using UnityEngine;
 using EventArgs = MT.Packages.EventSystem.EventArgs;
@@ -79,11 +79,15 @@ namespace MT.Packages.SequenceFlow
 		}
 
 		void OnEnable() {
-			Game.instance.Register(transform);
+#if PACKAGE_MT_TEN_YEARS_EXISTS
+			MT.Packages.TenYears.Game.instance.Register(transform);
+#endif
 		}
 
 		void OnDisable() {
+#if PACKAGE_MT_TEN_YEARS_EXISTS
 			Game.instance.Unregister(transform);
+#endif
 			if (coroutine != null) {
 				AfterCoroutine();
 				coroutine = null;
@@ -104,3 +108,4 @@ namespace MT.Packages.SequenceFlow
 		}
 	}
 }
+#endif
