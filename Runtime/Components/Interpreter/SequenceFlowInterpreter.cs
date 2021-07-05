@@ -39,7 +39,7 @@ namespace MT.Packages.SequenceFlow
 				return;
 			}
 			sequenceFlowObject.ReadFromData();
-			if (eventType == nameof(EventTypesEnum.Automatic)) {
+			if (eventType == "Automatic") {
 				Perform(transform, new EventArgs(eventType));
 			}
 		}
@@ -95,7 +95,7 @@ namespace MT.Packages.SequenceFlow
 		}
 
 		void Update() {
-			if (eventType != nameof(EventTypesEnum.Continuous)) {
+			if (eventType != "Continuous") {
 				return;
 			}
 			if (!CanPerform()) {
