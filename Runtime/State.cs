@@ -95,7 +95,6 @@ namespace MT.Packages.SequenceFlow
 #endif
 		}
 
-#if UNITY_EDITOR
 		public int GetX() => x;
 
 		public int GetY() => y;
@@ -113,6 +112,7 @@ namespace MT.Packages.SequenceFlow
 			this.y = Mathf.RoundToInt(y / PIXEL_SIZE);
 		}
 
+#if UNITY_EDITOR
 		[System.Obsolete]
 		public Rect GetRect() {
 			var empty = true;

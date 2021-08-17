@@ -14,17 +14,11 @@ namespace MT.Packages.SequenceFlow
 	{
 		[OldName("stateMachineObject")] public SequenceFlowObject sequenceFlowObject;
 
-		//[Space, InspectorButton] public bool startSequenceFlowButton;
-
 		[ReadOnly(onlyDuringPlayMode = true)] public float updateInterval = 1;
 		public SimpleData parameters = new SimpleData();
 
 		Coroutine coroutine;
 		Timer updateTimer;
-
-		//void StartSequenceFlowButton_Click() {
-		//	Perform(transform, new EventArgs("Editor"));
-		//}
 
 		public void StartSequenceFlow(Transform activator) {
 			Perform(activator, new EventArgs("Runtime"));
@@ -32,6 +26,9 @@ namespace MT.Packages.SequenceFlow
 
 		void Awake() {
 			updateTimer = updateInterval;
+			if (sequenceFlowObject) {
+				sequenceFlowObject = Instantiate(sequenceFlowObject);
+			}
 		}
 
 		protected override void OnStart() {
@@ -56,7 +53,7 @@ namespace MT.Packages.SequenceFlow
 			yield break;
 		}
 
-		public void Perform(Transform activator, EventArgs e) {
+		public override void Perform(Transform activator, EventArgs e) {
 			this.Log("Try to perform sequence flow...");
 			if (CanPerform()) {
 				coroutine = StartCoroutine(Flow(activator, e));
@@ -78,16 +75,11 @@ namespace MT.Packages.SequenceFlow
 			coroutine = null;
 		}
 
-		void OnEnable() {
-#if PACKAGE_MT_TEN_YEARS_EXISTS
-			MT.Packages.TenYears.Game.instance.Register(transform);
-#endif
+		protected virtual void OnEnable() {
+			
 		}
 
-		void OnDisable() {
-#if PACKAGE_MT_TEN_YEARS_EXISTS
-			Game.instance.Unregister(transform);
-#endif
+		protected virtual void OnDisable() {
 			if (coroutine != null) {
 				AfterCoroutine();
 				coroutine = null;

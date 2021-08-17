@@ -17,9 +17,11 @@ namespace MT.Packages.SequenceFlow.Editor.UIElements
 			{ "SequenceFlowObject", typeof(SequenceFlowObject) }
 		};
 
+		public static Core.SimpleData parameters;
+
 		static SequenceFlowWindow _window;
 		static SequenceFlowGraphView _view;
-
+		
 #pragma warning disable 51
 		static bool _ReadFromData = false;
 
@@ -39,18 +41,34 @@ namespace MT.Packages.SequenceFlow.Editor.UIElements
 		public static bool OnOpenAsset(int instanceID, int line) {
 			var @object = EditorUtility.InstanceIDToObject(instanceID);
 			if (@object is SequenceFlowObject sequenceFlowObject) {
-				Init();
-				_window.Focus();
-				var field = _window.rootVisualElement.Q<ObjectField>("SequenceFlowObject");
-				if (field != null) {
-					field.value = sequenceFlowObject;
-				}
+				parameters = null;
+				Open(sequenceFlowObject);
 			}
 			return false;
 		}
 
-		public SequenceFlowObject sequenceFlowObject;
+		public static void Open(SequenceFlowObject sequenceFlowObject) {
+			Init();
+			_window.Focus();
+			var field = _window.rootVisualElement.Q<ObjectField>("SequenceFlowObject");
+			if (field != null) {
+				field.value = null;
+				field.value = sequenceFlowObject;
+			}
+		}
 
+		public static void Reopen() {
+			Init();
+			_window.Focus();
+			var field = _window.rootVisualElement.Q<ObjectField>("SequenceFlowObject");
+			if (field != null && field.value is SequenceFlowObject sequenceFlowObject) {
+				field.value = null;
+				field.value = sequenceFlowObject;
+			}
+		}
+
+		public SequenceFlowObject sequenceFlowObject;
+		
 		DateTime lastInspectorUpdate = DateTime.MinValue;
 		DateTime currentLayoutLastWriteTime = DateTime.MinValue;
 
@@ -74,10 +92,9 @@ namespace MT.Packages.SequenceFlow.Editor.UIElements
 				name = "SequenceFlowObject",
 				allowSceneObjects = false
 			});
-			toolbar.Add(new Button(() => {
-				RefreshLayout();
-				RefreshView();
-			}) { text = "Refresh" });
+			toolbar.Add(new Button(Reopen) {
+				text = "Refresh"
+			});
 			rootVisualElement.Add(toolbar);
 		}
 
@@ -140,7 +157,9 @@ namespace MT.Packages.SequenceFlow.Editor.UIElements
 				oldView.RemoveTransitionSettings();
 				oldIndex = rootVisualElement.IndexOf(oldView);
 			}
-			_view = new SequenceFlowGraphView() { name = "SequenceFlowView" };
+			_view = new SequenceFlowGraphView() {
+				name = "SequenceFlowView"
+			};
 			_view.styleSheets.Add(styleSheet);
 			_view.StretchToParentSize();
 			if (oldIndex > -1) {

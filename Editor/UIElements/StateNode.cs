@@ -23,7 +23,8 @@ namespace MT.Packages.SequenceFlow.Editor.UIElements
 					var serializedStateSequences = serializedSequenceFlowObject.FindProperty("stateSequences");
 					var serializedStateSequence = serializedStateSequences.GetArrayElementAtIndex(state.GetSequenceIndex());
 					return serializedStateSequence.FindPropertyRelative("commands");
-				}
+				},
+				parameters = SequenceFlowWindow.parameters
 			};
 			sequenceView.Refresh();
 

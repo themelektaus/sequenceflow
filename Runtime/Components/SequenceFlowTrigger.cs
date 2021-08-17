@@ -7,7 +7,7 @@ namespace MT.Packages.SequenceFlow
 	using Core.Attributes;
 	using MoreTags;
 
-	[AddComponentMenu(Core.Utility.ASSET_NAME + "/Sequence Flow/Sequence Flow Trigger")]
+	[AddComponentMenu(Core.Utility.ASSET_NAME + "/Sequence Flow/Sequence Flow Trigger (Deprecated)")]
 	public class SequenceFlowTrigger : MonoBehaviour
 	{
 		[Tag] public string[] requiredTags;
@@ -16,6 +16,10 @@ namespace MT.Packages.SequenceFlow
 		public SimpleData parameters = new SimpleData();
 		
 		readonly List<Collider> activators = new List<Collider>();
+
+		void Awake() {
+			Debug.LogWarning($"{gameObject.name}: {GetType().Name} is deprecated");
+		}
 
 		void OnDisable() {
 			activators.Clear();

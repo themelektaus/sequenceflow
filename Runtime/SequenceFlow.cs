@@ -68,12 +68,24 @@ namespace MT.Packages.SequenceFlow
             this._self = _self;
             do {
                 var sequence = currentState.GetSequence();
-                sequence.Start(activator, _self, parameters);
+                sequence.Start(activator, _self, parameters, e);
                 while (sequence.Running) {
                     yield return null;
                 }
-                currentState = currentState.GetNext(e);
+                if (currentState != null) {
+                    currentState = currentState.GetNext(e);
+				}
             } while (currentState != null);
+        }
+
+        public void Abort() {
+            if (currentState != null) {
+                var sequence = currentState.GetSequence();
+                if (sequence != null) {
+                    sequence.Abort();
+			    }
+                currentState = null;
+			}
         }
     }
 }
