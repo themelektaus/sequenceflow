@@ -1,3 +1,4 @@
+#if !MT_PACKAGES_PROJECT
 using UnityEditor;
 
 namespace MT.Packages.SequenceFlow.Editor
@@ -31,3 +32,4 @@ namespace MT.Packages.SequenceFlow.Editor
 		}
 	}
 }
+#endif

@@ -1,4 +1,5 @@
-﻿using UnityEditor;
+﻿#if !MT_PACKAGES_PROJECT
+using UnityEditor;
 using UnityEditor.Experimental.SceneManagement;
 using UnityEngine;
 
@@ -91,3 +92,4 @@ namespace MT.Packages.SequenceFlow.Editor
 		}
 	}
 }
+#endif

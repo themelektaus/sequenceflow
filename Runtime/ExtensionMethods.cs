@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿#if !MT_PACKAGES_PROJECT
+using UnityEngine;
 
 namespace MT.Packages.SequenceFlow
 {
@@ -17,3 +18,4 @@ namespace MT.Packages.SequenceFlow
 		}
 	}
 }
+#endif

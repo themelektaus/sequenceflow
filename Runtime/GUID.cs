@@ -4,6 +4,7 @@ namespace MT.Packages.SequenceFlow
 {
 	public abstract class GUID
 	{
+#if !MT_PACKAGES_PROJECT
 		[NonSerialized] public SequenceFlow sequenceFlow;
 		public string guid;
 
@@ -13,5 +14,6 @@ namespace MT.Packages.SequenceFlow
 				guid = Guid.NewGuid().ToString();
 			}
 		}
+#endif
 	}
 }
