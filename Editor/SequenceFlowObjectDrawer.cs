@@ -1,5 +1,5 @@
 ﻿using UnityEditor;
-using UnityEditor.Experimental.SceneManagement;
+
 using UnityEngine;
 
 namespace MT.Packages.SequenceFlow.Editor
@@ -7,7 +7,7 @@ namespace MT.Packages.SequenceFlow.Editor
 	[CustomPropertyDrawer(typeof(SequenceFlowObject))]
 	public class SequenceFlowObjectDrawer : PropertyDrawer
 	{
-		PrefabStage stage;
+		UnityEditor.SceneManagement.PrefabStage stage;
 		string stageAssetPath;
 		GameObject stageAsset;
 		
@@ -77,7 +77,7 @@ namespace MT.Packages.SequenceFlow.Editor
 		}
 
 		bool UpdateAndCheckPrefabStage() {
-			stage = PrefabStageUtility.GetCurrentPrefabStage();
+			stage = UnityEditor.SceneManagement.PrefabStageUtility.GetCurrentPrefabStage();
 			if (stage == null) {
 				stageAssetPath = null;
 				stageAsset = null;
