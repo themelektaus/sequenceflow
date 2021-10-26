@@ -11,8 +11,10 @@ namespace MT.Packages.SequenceFlow
 	public class SequenceFlowTrigger : MonoBehaviour
 	{
 		[Tag] public string[] requiredTags;
+#if !MT_PACKAGES_PROJECT
 		public SequenceFlowInterpreter onEnterInterpreter;
 		public SequenceFlowInterpreter onExitInterpreter;
+#endif
 		public SimpleData parameters = new SimpleData();
 		
 		readonly List<Collider> activators = new List<Collider>();
@@ -26,6 +28,7 @@ namespace MT.Packages.SequenceFlow
 		}
 
 		void OnTriggerEnter(Collider collision) {
+#if !MT_PACKAGES_PROJECT
 			if (!onEnterInterpreter || !enabled) {
 				return;
 			}
@@ -38,10 +41,9 @@ namespace MT.Packages.SequenceFlow
 				foreach (var parameter in parameters) {
 					onEnterInterpreter.parameters.Set(parameter);
 				}
-#if !MT_PACKAGES_PROJECT
 				onEnterInterpreter.Perform(collision.transform, null);
-#endif
 			}
+#endif
 			if (!activators.Contains(collision)) {
 				activators.Add(collision);
 			}
@@ -56,6 +58,7 @@ namespace MT.Packages.SequenceFlow
 			if (activators.Contains(collision)) {
 				activators.Remove(collision);
 			}
+#if !MT_PACKAGES_PROJECT
 			if (!onExitInterpreter || !enabled) {
 				return;
 			}
@@ -63,10 +66,9 @@ namespace MT.Packages.SequenceFlow
 				foreach (var parameter in parameters) {
 					onExitInterpreter.parameters.Set(parameter);
 				}
-#if !MT_PACKAGES_PROJECT
 				onExitInterpreter.Perform(collision.transform, null);
-#endif
 			}
+#endif
 		}
 	}
 }
