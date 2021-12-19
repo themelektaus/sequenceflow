@@ -57,6 +57,8 @@ namespace MT.Packages.SequenceFlow
 
 #if UNITY_EDITOR
 		public bool WriteToData(bool saveAssets = false) {
+			if (sequenceFlow.states.Any(x => x.sequenceFlow == null))
+				return false;
 			var newData = GetSerializedData();
 			if (data != newData) {
 				data = newData;
@@ -77,7 +79,7 @@ namespace MT.Packages.SequenceFlow
 				transition.sourceGUID = transition.source.guid;
 				transition.destinationGUID = transition.destination.guid;
 			}
-			var result = UnityEngine.JsonUtility.ToJson(sequenceFlow);
+			var result = JsonUtility.ToJson(sequenceFlow);
 			if (compress) {
 				result = Core.Utility.Compress(result);
 			}
