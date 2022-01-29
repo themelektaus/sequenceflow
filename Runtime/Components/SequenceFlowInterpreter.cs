@@ -102,10 +102,6 @@ namespace MT.Packages.SequenceFlow
             yield return GetBeforeRoutines(activator);
             yield return sequenceFlowObject.sequenceFlow.Start(activator, this, parameters, e);
             yield return GetAfterRoutines();
-
-            foreach (var afterCoroutine in afterCoroutines)
-                yield return afterCoroutine();
-
             coroutine = null;
         }
 
@@ -118,7 +114,8 @@ namespace MT.Packages.SequenceFlow
         {
             if (coroutine != null)
             {
-                StartCoroutine(GetAfterRoutines());
+                if (gameObject.activeInHierarchy)
+                    StartCoroutine(GetAfterRoutines());
                 coroutine = null;
             }
         }
@@ -136,6 +133,7 @@ namespace MT.Packages.SequenceFlow
             if (!enabled)
                 return;
 
+            activators.RemoveAll(x => !x);
             if (activators.Count == 0 && sequenceFlowObject && Contains("TriggerEnter"))
             {
                 if (autoAbortSequenceFlow)
@@ -152,6 +150,7 @@ namespace MT.Packages.SequenceFlow
             if (activators.Contains(other))
                 activators.Remove(other);
 
+            activators.RemoveAll(x => !x);
             if (enabled && activators.Count == 0 && Contains("TriggerExit"))
             {
                 if (autoAbortSequenceFlow)
