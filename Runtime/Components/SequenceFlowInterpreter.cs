@@ -70,16 +70,34 @@ namespace MT.Packages.SequenceFlow
         public override void Perform(Transform activator, EventArgs e)
         {
             this.Log("Try to perform sequence flow...");
-            if (CanPerform())
-                coroutine = StartCoroutine(Flow(activator, e));
+
+            if (!HasSequenceFlow())
+                return;
+
+            if (IsRunning())
+            {
+                if (!autoAbortSequenceFlow)
+                    return;
+                OnAbort();
+            }
+
+            coroutine = StartCoroutine(Flow(activator, e));
         }
 
-        bool CanPerform()
+        bool HasSequenceFlow()
         {
-            if (!sequenceFlowObject) return false;
-            if (sequenceFlowObject.sequenceFlow == null) return false;
-            if (sequenceFlowObject.sequenceFlow.Running) return false;
+            if (!sequenceFlowObject)
+                return false;
+
+            if (sequenceFlowObject.sequenceFlow == null)
+                return false;
+
             return true;
+        }
+
+        bool IsRunning()
+        {
+            return sequenceFlowObject.sequenceFlow.Running;
         }
 
         IEnumerator GetBeforeRoutines(Transform activator)
@@ -122,7 +140,8 @@ namespace MT.Packages.SequenceFlow
 
         void Update()
         {
-            if (!CanPerform()) return;
+            if (!HasSequenceFlow()) return;
+            if (IsRunning()) return;
             if (!Contains("Continuous")) return;
             if (!updateTimer.Update()) return;
             coroutine = StartCoroutine(Flow(transform, new EventArgs("Continuous")));

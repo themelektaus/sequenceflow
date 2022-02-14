@@ -1,5 +1,6 @@
 #if !MT_PACKAGES_PROJECT
 using UnityEditor;
+using UnityEngine;
 
 namespace MT.Packages.SequenceFlow.Editor
 {
@@ -21,15 +22,36 @@ namespace MT.Packages.SequenceFlow.Editor
 			//		EditorGUILayout.PropertyField(serializedObject.FindProperty("updateInterval"));
 			//	}
 			//}
-			EditorGUILayout.PropertyField(serializedObject.FindProperty("eventType"));
-			EditorGUILayout.PropertyField(serializedObject.FindProperty("eventTypes"));
+
+			var eventType = serializedObject.FindProperty("eventType");
+			if (eventType.stringValue != "None")
+				EditorGUILayout.PropertyField(serializedObject.FindProperty("eventType"));
+
+			var eventTypes = serializedObject.FindProperty("eventTypes");
+			EditorGUILayout.PropertyField(eventTypes);
+
+			for (int i = 0; i < eventTypes.arraySize; i++)
+			{
+				if (eventTypes.GetArrayElementAtIndex(i).stringValue != "Continuous")
+					continue;
+
+				EditorGUILayout.PropertyField(serializedObject.FindProperty("updateInterval"));
+				EditorGUILayout.Space();
+				break;
+			}
+
 			//if (eventType.stringValue == "None") {
 			//	EditorGUILayout.PropertyField(serializedObject.FindProperty("triggerType"), new GUIContent("Trigger Type"));
 			//}
 			//objectDrawer.Draw(serializedObject, (SequenceFlowInterpreter) target);
 			EditorGUILayout.PropertyField(serializedObject.FindProperty("sequenceFlowObject"));
-			EditorGUILayout.PropertyField(serializedObject.FindProperty("autoAbortSequenceFlow"));
-			EditorGUILayout.PropertyField(serializedObject.FindProperty("updateInterval"));
+
+			EditorGUILayout.BeginHorizontal();
+			var autoAbort = serializedObject.FindProperty("autoAbortSequenceFlow");
+			autoAbort.boolValue = EditorGUILayout.Toggle(" ", autoAbort.boolValue);
+			EditorGUILayout.LabelField("Auto Abort");
+			EditorGUILayout.EndHorizontal();
+
 			//EditorGUILayout.PropertyField(serializedObject.FindProperty("startSequenceFlowButton"));
 			EditorGUILayout.PropertyField(serializedObject.FindProperty("parameters"));
 			serializedObject.ApplyModifiedProperties();
