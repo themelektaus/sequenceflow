@@ -48,8 +48,7 @@ namespace MT.Packages.SequenceFlow.Editor
 
 			EditorGUILayout.BeginHorizontal();
 			var autoAbort = serializedObject.FindProperty("autoAbortSequenceFlow");
-			autoAbort.boolValue = EditorGUILayout.Toggle(" ", autoAbort.boolValue);
-			EditorGUILayout.LabelField("Auto Abort");
+			autoAbort.boolValue = EditorGUILayout.Toggle("Auto Abort", autoAbort.boolValue);
 			EditorGUILayout.EndHorizontal();
 
 			//EditorGUILayout.PropertyField(serializedObject.FindProperty("startSequenceFlowButton"));
