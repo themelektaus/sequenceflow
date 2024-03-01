@@ -1,19 +1,20 @@
 ﻿using System;
 
-namespace MT.Packages.SequenceFlow
+namespace Prototype.SequenceFlow
 {
-	public abstract class GUID
-	{
-#if !MT_PACKAGES_PROJECT
-		[NonSerialized] public SequenceFlow sequenceFlow;
-		public string guid;
+    public abstract class Guid
+    {
+        [NonSerialized]
+        public SequenceFlow sequenceFlow;
 
-		public void Setup(SequenceFlow sequenceFlow) {
-			this.sequenceFlow = sequenceFlow;
-			if (string.IsNullOrEmpty(guid)) {
-				guid = Guid.NewGuid().ToString();
-			}
-		}
-#endif
-	}
+        public string guid;
+
+        public void Setup(SequenceFlow sequenceFlow)
+        {
+            this.sequenceFlow = sequenceFlow;
+
+            if (string.IsNullOrEmpty(guid))
+                guid = System.Guid.NewGuid().ToString();
+        }
+    }
 }

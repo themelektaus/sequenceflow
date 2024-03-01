@@ -1,41 +1,20 @@
-﻿#if !MT_PACKAGES_PROJECT
-using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections;
+
 using UnityEngine;
-using EventArgs = MT.Packages.EventSystem.EventArgs;
-using OldName = UnityEngine.Serialization.FormerlySerializedAsAttribute;
 
-namespace MT.Packages.SequenceFlow
+namespace Prototype.SequenceFlow
 {
-    using Core;
-    using Core.Attributes;
-
-    [AddComponentMenu(Utility.ASSET_NAME + "/Sequence Flow/Sequence Flow Interpreter")]
-    public class SequenceFlowInterpreter : EventSystem.Interpreter
+    public class SequenceFlowInterpreter : Interpreter
     {
-        [OldName("stateMachineObject")] public SequenceFlowObject sequenceFlowObject;
+        public SequenceFlowObject sequenceFlowObject;
         public bool autoAbortSequenceFlow;
 
-        [ReadOnly(onlyDuringPlayMode = true)] public float updateInterval = 1;
-        public SimpleData parameters = new SimpleData();
+        [SerializeField] bool logging;
 
-        Coroutine coroutine;
-        Timer updateTimer;
-
-        [HideInInspector]
-        public readonly List<System.Func<Transform, IEnumerator>> beforeCoroutines = new List<System.Func<Transform, IEnumerator>>();
-
-        [HideInInspector]
-        public readonly List<System.Func<IEnumerator>> afterCoroutines = new List<System.Func<IEnumerator>>();
-
-        readonly List<Collider> activators = new List<Collider>();
-
-        public void StartSequenceFlow(Transform activator) =>
-            Perform(activator, new EventArgs("Runtime"));
+        public SimpleData parameters = new();
 
         void Awake()
         {
-            updateTimer = updateInterval;
             if (sequenceFlowObject)
                 sequenceFlowObject = Instantiate(sequenceFlowObject);
         }
@@ -44,9 +23,8 @@ namespace MT.Packages.SequenceFlow
         {
             if (!sequenceFlowObject)
                 return;
+
             sequenceFlowObject.ReadFromData();
-            if (Contains("Automatic"))
-                Perform(transform, new EventArgs("Automatic"));
         }
 
         protected override void OnReceive(Transform sender, EventArgs e) =>
@@ -55,33 +33,41 @@ namespace MT.Packages.SequenceFlow
         protected override void OnAbort()
         {
             sequenceFlowObject.AbortFlow();
+
+            Debug.LogWarning("Sequence aborted");
         }
 
-        protected virtual IEnumerator BeforeCoroutine(Transform activator)
-        {
-            yield break;
-        }
+        public void Perform()
+            => Perform(null, new());
 
-        protected virtual IEnumerator AfterCoroutine()
-        {
-            yield break;
-        }
+        public void Perform(Transform activator)
+            => Perform(activator, new());
+
+        public void Perform(string eventType)
+            => Perform(null, new(eventType));
 
         public override void Perform(Transform activator, EventArgs e)
         {
-            this.Log("Try to perform sequence flow...");
+            if (logging)
+                Debug.Log("Try to perform sequence flow...");
 
             if (!HasSequenceFlow())
+            {
+                Debug.LogWarning("There is no sequence flow to perform");
                 return;
+            }
 
             if (IsRunning())
             {
+                Debug.LogWarning("Sequence flow is already running");
+
                 if (!autoAbortSequenceFlow)
                     return;
-                OnAbort();
+
+                Abort();
             }
 
-            coroutine = StartCoroutine(Flow(activator, e));
+            StartCoroutine(Flow(activator, e));
         }
 
         bool HasSequenceFlow()
@@ -100,83 +86,15 @@ namespace MT.Packages.SequenceFlow
             return sequenceFlowObject.sequenceFlow.Running;
         }
 
-        IEnumerator GetBeforeRoutines(Transform activator)
-        {
-            foreach (var beforeCoroutine in beforeCoroutines)
-                yield return beforeCoroutine(activator);
-            yield return BeforeCoroutine(activator);
-        }
-
-        IEnumerator GetAfterRoutines()
-        {
-            yield return AfterCoroutine();
-            foreach (var afterCoroutine in afterCoroutines)
-                yield return afterCoroutine();
-        }
-
         IEnumerator Flow(Transform activator, EventArgs e)
         {
-            this.Log("Coroutine started");
-            yield return GetBeforeRoutines(activator);
-            yield return sequenceFlowObject.sequenceFlow.Start(activator, this, parameters, e);
-            yield return GetAfterRoutines();
-            coroutine = null;
-        }
+            if (logging)
+                Debug.Log("Coroutine started");
 
-        protected virtual void OnEnable()
-        {
-            
-        }
+            yield return sequenceFlowObject.sequenceFlow.Start(activator, this, e, parameters);
 
-        protected virtual void OnDisable()
-        {
-            if (coroutine != null)
-            {
-                if (gameObject.activeInHierarchy)
-                    StartCoroutine(GetAfterRoutines());
-                coroutine = null;
-            }
-        }
-
-        void Update()
-        {
-            if (!HasSequenceFlow()) return;
-            if (IsRunning()) return;
-            if (!Contains("Continuous")) return;
-            if (!updateTimer.Update()) return;
-            coroutine = StartCoroutine(Flow(transform, new EventArgs("Continuous")));
-        }
-
-        void OnTriggerEnter(Collider other)
-        {
-            if (!enabled)
-                return;
-
-            activators.RemoveAll(x => !x);
-            if (activators.Count == 0 && sequenceFlowObject && Contains("TriggerEnter"))
-            {
-                if (autoAbortSequenceFlow)
-                    OnAbort();
-                Perform(other.transform, new EventArgs("TriggerEnter"));
-            }
-
-            if (!activators.Contains(other))
-                activators.Add(other);
-        }
-
-        void OnTriggerExit(Collider other)
-        {
-            if (activators.Contains(other))
-                activators.Remove(other);
-
-            activators.RemoveAll(x => !x);
-            if (enabled && activators.Count == 0 && Contains("TriggerExit"))
-            {
-                if (autoAbortSequenceFlow)
-                    OnAbort();
-                Perform(other.transform, new EventArgs("TriggerExit"));
-            }
+            if (logging)
+                Debug.Log("Coroutine has finished");
         }
     }
 }
-#endif

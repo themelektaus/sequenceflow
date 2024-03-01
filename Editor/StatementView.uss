@@ -1,0 +1,76 @@
+﻿StatementView {
+    padding: 10px;
+    border-width: 1px;
+    border-color: rgba(155, 205, 255, .75);
+    border-radius: 6px;
+}
+
+StatementView > TemplateContainer {
+    margin-bottom: 10px;
+    padding: 5px;
+    border-top-width: 1px;
+    border-bottom-width: 1px;
+    border-top-color: rgba(255, 255, 255, 0.15);
+    border-bottom-color: rgba(255, 255, 255, 0.15);
+}
+
+StatementView > TemplateContainer.disabled {
+    opacity: 0.625;
+}
+
+StatementView > EnumField {
+    padding-bottom: 10px;
+}
+
+.AddButton {
+    padding: 3px;
+    background-color: #343;
+    border-width: 0;
+    margin: 0;
+}
+
+.AddButton:hover {
+    background-color: #353;
+}
+
+.AddButton:active {
+    background-color: #305030;
+}
+
+.DeleteButton {
+    background-color: #830;
+}
+
+.DeleteButton:hover {
+    background-color: #940;
+}
+
+.DeleteButton:active {
+    background-color: #720;
+}
+
+.EditButton {
+    background-color: #446;
+}
+
+.EditButton:hover {
+    background-color: #557;
+}
+
+.EditButton:active {
+    background-color: #446;
+}
+
+#Parameters > * {
+    margin: 4px 0;
+}
+
+#Parameters .unity-base-field Label {
+    -unity-text-align: middle-right;
+    margin-right: 10px;
+}
+
+#Executer {
+    margin: 0 5px;
+    min-width: 75px;
+}

@@ -1,13 +1,34 @@
-﻿using UnityEngine;
+﻿using System;
+using System.IO;
+using System.Runtime.CompilerServices;
 
-namespace MT.Packages.SequenceFlow
+using UnityEditor;
+
+namespace Prototype.SequenceFlow
 {
-	public class SequenceFlowEditorSettings : ScriptableObject
+	public class SequenceFlowEditorSettings : UnityEngine.ScriptableObject
 	{
-		static SequenceFlowEditorSettings _asset;
-		public static SequenceFlowEditorSettings asset => Core.Utility.Get(ref _asset, "Sequence Flow", "Sequence Flow Editor Settings");
+        public static SequenceFlowEditorSettings instance { get; private set; }
 
-		public enum PortPosition { Top, Bottom, Side }
+        public static void Load([CallerFilePath] string path = null)
+        {
+            path = Path.GetRelativePath(
+                Environment.CurrentDirectory,
+                new FileInfo(path).Directory.FullName
+            );
+            path = Path.Combine(path, $"{nameof(SequenceFlowEditorSettings)}.asset");
+
+            instance = AssetDatabase.LoadAssetAtPath<SequenceFlowEditorSettings>(path);
+
+            if (instance)
+                return;
+
+            instance = CreateInstance<SequenceFlowEditorSettings>();
+            AssetDatabase.CreateAsset(instance, path);
+            AssetDatabase.Refresh();
+        }
+
+        public enum PortPosition { Top, Bottom }
 
 		public PortPosition portPosition = PortPosition.Top;
 	}

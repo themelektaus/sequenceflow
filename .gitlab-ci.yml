@@ -1,8 +1,0 @@
-image: node:14-buster
-stages:
-  - deploy
-deploy:
-  stage: deploy
-  script:
-    - expect -f /opt/login
-    - bash /opt/publish

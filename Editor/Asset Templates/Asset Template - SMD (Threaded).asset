@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 79a978c2b4047b042a47a5686a7ba250, type: 3}
+  m_Name: Asset Template - SMD (Threaded)
+  m_EditorClassIdentifier: 
+  title: SMD (Threaded)
+  description: Create a Threaded Sequence Method Definition
+  variables:
+  - name: Name
+    required: 1
+    multilineValue: 0
+    value: 
+  _Create_Open_Template_Folder: 0

@@ -1,0 +1,91 @@
+Toolbar {
+    height: 25px;
+}
+
+Toolbar Button {
+    margin-left: 0;
+}
+
+#collapse-button {
+    display: none;
+}
+
+#SequenceFlowObject {
+    margin-top: 1px;
+}
+
+#TransitionSettings {
+    position: absolute;
+    width: 360;
+    background-color: #222222;
+    right: 15;
+    top: 40;
+}
+
+GridBackground {
+    --grid-background-color: #282828;
+    --line-color: rgba(193, 196, 192, 0.1);
+    --thick-line-color: rgba(193, 196, 192, 0.1);
+    --spacing: 20;
+}
+
+.unity-base-field {
+    margin: 0;
+}
+
+.multiline TextInput {
+    white-space: normal;
+    overflow: visible;
+    height: 100%;
+    max-height: 100%;
+    padding-bottom: 1px;
+    max-width: 170px;
+}
+
+SequenceFlowGraphView #divider.horizontal {
+    display: none;
+}
+
+#top {
+    height: 22px;
+    background-color: rgba(0, 0, 0, 0);
+    border-top-width: 1px;
+    border-top-color: rgba(0, 0, 0, 0.3);
+    border-bottom-width: 1px;
+    border-bottom-color: rgba(0, 0, 0, 0.3);
+}
+
+#top #input {
+    max-width: 80px;
+}
+
+#top #divider {
+    flex-grow: 1;
+    background-color: rgba(0, 0, 0, 0);
+}
+
+#top #output {
+    max-width: 80px;
+}
+
+#title-button-container {
+    padding: 0;
+}
+
+#title-button-container Button {
+    font-size: 16px;
+    background-color: transparent;
+    margin-top: 8px;
+}
+
+.port.has-conditions {
+    --port-color: rgba(155, 255, 155, 1);
+}
+
+.port.has-no-conditions {
+    --port-color: rgba(175, 175, 175, .8);
+}
+
+.port.output {
+    --port-color: rgba(175, 175, 175, .8);
+}
