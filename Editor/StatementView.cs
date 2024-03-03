@@ -17,6 +17,8 @@ namespace Prototype.SequenceFlow.Editor
     {
         struct MethodDataBridge
         {
+            public Statement statement;
+            public int conditionIndex;
             public TextField methodField;
             public VisualElement parametersElement;
             public SerializedProperty serializedMethod;
@@ -72,6 +74,9 @@ namespace Prototype.SequenceFlow.Editor
             logicGate.BindProperty(serializedStatement.FindPropertyRelative("logicGate"));
             Add(logicGate);
 
+            var scrollView = new ScrollView();
+            Add(scrollView);
+
             if (statement.conditions is not null)
             {
                 var serializedConditions = serializedStatement.FindPropertyRelative("conditions");
@@ -96,33 +101,9 @@ namespace Prototype.SequenceFlow.Editor
 
                     layout.Q<EnumField>("Executer").BindProperty(serializedCondition.FindPropertyRelative("executer"));
 
-                    SetupMethodField(layout, serializedCondition.FindPropertyRelative("method"));
+                    SetupMethodField(layout, statement, serializedCondition.FindPropertyRelative("method"), i);
 
-                    layout.Q<Button>("Up").SetEnabled(i > 0);
-                    layout.Q<Button>("Up").clicked += () =>
-                    {
-                        var _i = ArrayUtility.IndexOf(statement.conditions, condition);
-                        ArrayUtility.Remove(ref statement.conditions, condition);
-                        ArrayUtility.Insert(ref statement.conditions, _i - 1, condition);
-                        Refresh();
-                    };
-
-                    layout.Q<Button>("Down").SetEnabled(i < statement.conditions.Length - 1);
-                    layout.Q<Button>("Down").clicked += () =>
-                    {
-                        var _i = ArrayUtility.IndexOf(statement.conditions, condition);
-                        ArrayUtility.Remove(ref statement.conditions, condition);
-                        ArrayUtility.Insert(ref statement.conditions, _i + 1, condition);
-                        Refresh();
-                    };
-
-                    layout.Q<Button>("Delete").clicked += () =>
-                    {
-                        ArrayUtility.Remove(ref statement.conditions, condition);
-                        Refresh();
-                    };
-
-                    Add(layout);
+                    scrollView.Add(layout);
                 }
             }
 
@@ -141,35 +122,64 @@ namespace Prototype.SequenceFlow.Editor
             Add(button);
         }
 
-        void SetupMethodField(TemplateContainer layout, SerializedProperty serializedMethod)
+        void SetupMethodField(
+            TemplateContainer layout,
+            Statement statement,
+            SerializedProperty serializedMethod,
+            int conditionIndex
+        )
         {
             var methodNameProperty = serializedMethod.FindPropertyRelative("name");
 
             var bridge = new MethodDataBridge
             {
+                statement = statement,
+                conditionIndex = conditionIndex,
                 methodField = layout.Q<TextField>("Method"),
                 parametersElement = layout.Q("Parameters"),
                 serializedMethod = serializedMethod,
                 methodNameProperty = methodNameProperty
             };
 
-            bridge.methodField.Q("unity-text-input").style.color = new Color(1, .75f, 0);
-            bridge.methodField.RegisterCallback<FocusEvent>(e =>
+            layout.RegisterCallback<MouseUpEvent>(e =>
             {
-                bridge.methodField.Blur();
+                if (e.button != 1)
+                    return;
+
+                e.StopPropagation();
+            }, TrickleDown.TrickleDown);
+
+            layout.RegisterCallback<MouseDownEvent>(e =>
+            {
+                if (e.button != 1)
+                    return;
+
+                e.StopPropagation();
 
                 var menu = new GenericMenu();
                 var on = bridge.methodNameProperty.stringValue.Equals("");
 
-                menu.AddItem(new GUIContent("(None)"), on, OnMethodItemSelected, (bridge, ""));
+                menu.AddItem(new GUIContent("Statement/(None)"), on, OnMethodItemSelected, (bridge, ""));
 
                 menu.AddSeparator(string.Empty);
 
                 foreach (var definition in StatementMethodDefinition.GetDefaultInstances())
-                    AddMethodItem(bridge, menu, "", definition);
+                    AddMethodItem(bridge, menu, "Statement/", definition);
 
+                menu.AddSeparator(string.Empty);
+
+                var condition = bridge.statement.conditions[bridge.conditionIndex];
+
+                menu.AddItem(new("Move Up"), false, bridge.conditionIndex > 0 ? new GenericMenu.MenuFunction(() => MoveUp(bridge.statement, condition)) : null);
+                menu.AddItem(new("Move Down"), false, bridge.conditionIndex < bridge.statement.conditions.Length - 1 ? new GenericMenu.MenuFunction(() => MoveDown(bridge.statement, condition)) : null);
+
+                menu.AddSeparator(string.Empty);
+
+                menu.AddItem(new("Delete"), false, () => Delete(bridge.statement, condition));
                 menu.ShowAsContext();
             });
+
+            bridge.methodField.Q("unity-text-input").style.color = new Color(1, .75f, 0);
 
             SetMethodFieldValue(ref bridge);
         }
@@ -236,5 +246,28 @@ namespace Prototype.SequenceFlow.Editor
             y.Item1.methodNameProperty.serializedObject.ApplyModifiedProperties();
             Refresh();
         }
+
+        void MoveUp(Statement statement, StatementCondition condition)
+        {
+            var i = ArrayUtility.IndexOf(statement.conditions, condition);
+            ArrayUtility.Remove(ref statement.conditions, condition);
+            ArrayUtility.Insert(ref statement.conditions, i - 1, condition);
+            Refresh();
+        }
+        
+        void MoveDown(Statement statement, StatementCondition condition)
+        {
+            var i = ArrayUtility.IndexOf(statement.conditions, condition);
+            ArrayUtility.Remove(ref statement.conditions, condition);
+            ArrayUtility.Insert(ref statement.conditions, i + 1, condition);
+            Refresh();
+        }
+
+        void Delete(Statement statement, StatementCondition condition)
+        {
+            ArrayUtility.Remove(ref statement.conditions, condition);
+            Refresh();
+        }
+
     }
 }

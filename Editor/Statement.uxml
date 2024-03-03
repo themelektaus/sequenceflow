@@ -1,11 +1,8 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="False">
-    <ui:VisualElement style="flex-direction: row; ">
+    <ui:VisualElement style="flex-direction: row;">
         <ui:Toggle name="Enabled" style="margin-bottom: 0; margin-top: 0;" />
         <uie:EnumField name="Executer" style="width: 70px;" />
         <ui:TextField name="Method" readonly="true" style="flex-grow: 1;" />
-        <ui:Button text="▲" name="Up" class="EditButton" style="margin-left: 3px; margin-right: 2px; margin-top: 0; margin-bottom: 0; padding-left: 3px; padding-right: 3px; padding-top: 0; padding-bottom: 0; border-top-left-radius: 0; border-bottom-left-radius: 0; border-top-right-radius: 0; border-bottom-right-radius: 0; border-left-width: 0.5px; border-right-width: 0.5px; border-top-width: 0.5px; border-bottom-width: 0.5px; height: 17px; width: 18px; border-left-color: rgb(17, 17, 17); border-right-color: rgb(17, 17, 17); border-top-color: rgb(17, 17, 17); border-bottom-color: rgb(17, 17, 17);" />
-        <ui:Button text="▼" name="Down" class="EditButton" style="margin-left: 0.5px; margin-right: 2px; margin-top: 0; margin-bottom: 0; padding-left: 3px; padding-right: 3px; padding-top: 0; padding-bottom: 0; border-top-left-radius: 0; border-bottom-left-radius: 0; border-top-right-radius: 0; border-bottom-right-radius: 0; border-left-width: 0.5px; border-right-width: 0.5px; border-top-width: 0.5px; border-bottom-width: 0.5px; height: 17px; border-left-color: rgb(17, 17, 17); border-right-color: rgb(17, 17, 17); border-top-color: rgb(17, 17, 17); border-bottom-color: rgb(17, 17, 17); width: 18px;" />
-        <ui:Button text="X" name="Delete" class="DeleteButton" style="margin-left: 1px; margin-right: 0; margin-top: 0; margin-bottom: 0; padding-left: 5px; padding-right: 5px; padding-top: 0; padding-bottom: 0; border-top-left-radius: 0; border-bottom-left-radius: 0; border-top-right-radius: 0; border-bottom-right-radius: 0; height: 17px; border-left-width: 0.5px; border-right-width: 0.5px; border-top-width: 0.5px; border-bottom-width: 0.5px; border-left-color: rgb(17, 17, 17); border-right-color: rgb(17, 17, 17); border-top-color: rgb(17, 17, 17); border-bottom-color: rgb(17, 17, 17); width: 18px;" />
     </ui:VisualElement>
     <ui:VisualElement name="Parameters" />
 </ui:UXML>

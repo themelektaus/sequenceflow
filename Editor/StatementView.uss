@@ -5,8 +5,18 @@
     border-radius: 6px;
 }
 
-StatementView > TemplateContainer {
-    margin-bottom: 10px;
+StatementView > ScrollView {
+    max-height: 440px;
+    margin: 3px 0;
+}
+
+StatementView > ScrollView #unity-content-viewport {
+    padding-right: 3px;
+}
+
+StatementView > ScrollView TemplateContainer {
+    margin-top: 5px;
+    margin-bottom: 5px;
     padding: 5px;
     border-top-width: 1px;
     border-bottom-width: 1px;
@@ -14,12 +24,8 @@ StatementView > TemplateContainer {
     border-bottom-color: rgba(255, 255, 255, 0.15);
 }
 
-StatementView > TemplateContainer.disabled {
+StatementView > ScrollView TemplateContainer.disabled {
     opacity: 0.625;
-}
-
-StatementView > EnumField {
-    padding-bottom: 10px;
 }
 
 .AddButton {
