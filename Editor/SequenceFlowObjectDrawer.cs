@@ -37,6 +37,9 @@ namespace Prototype.SequenceFlow.Editor
                     var target = property.serializedObject.targetObject;
                     var parameters = target.GetType().GetField("parameters");
 
+                    if (target is Interpreter interpreter)
+                        SequenceFlowWindow.scene = interpreter.gameObject.scene;
+
                     if (parameters.GetValue(target) is SimpleData simpleData)
                         SequenceFlowWindow.parameters = simpleData;
 
@@ -76,7 +79,7 @@ namespace Prototype.SequenceFlow.Editor
 
                 if (GUI.Button(p, "Create"))
                 {
-                    sequenceFlowObject = UnityEngine.ScriptableObject.CreateInstance<SequenceFlowObject>();
+                    sequenceFlowObject = ScriptableObject.CreateInstance<SequenceFlowObject>();
 
                     if (UpdateAndCheckPrefabStage())
                     {

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 
 using UnityEditor;
 using UnityEditor.UIElements;
@@ -11,12 +10,12 @@ namespace Prototype.SequenceFlow.Editor
 {
     public class SequenceFlowWindow : EditorWindow
     {
-        const string STYLESHEET_PATH = "Assets/SequenceFlow/Editor/SequenceFlowWindow.uss";
-
+        public static UnityEngine.SceneManagement.Scene scene;
         public static SimpleData parameters;
 
         static SequenceFlowWindow _window;
         static SequenceFlowGraphView _view;
+        public static float viewHeight => _view.contentRect.height;
 
         [MenuItem("Tools/Sequence Flow")]
         static void Init()
@@ -33,6 +32,7 @@ namespace Prototype.SequenceFlow.Editor
 
             if (@object is SequenceFlowObject sequenceFlowObject)
             {
+                scene = default;
                 parameters = null;
                 Open(sequenceFlowObject);
             }
@@ -81,7 +81,7 @@ namespace Prototype.SequenceFlow.Editor
 
             lastInspectorUpdate = DateTime.Now;
 
-            if (sequenceFlowObject && sequenceFlowObject.WriteToData())
+            if (sequenceFlowObject && sequenceFlowObject.WriteToData(scene))
                 Debug.Log("Sequence Flow has been saved");
         }
 
@@ -94,7 +94,10 @@ namespace Prototype.SequenceFlow.Editor
         {
             rootVisualElement.Clear();
 
-            var styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>(STYLESHEET_PATH);
+            var styleSheet = AssetDatabase.LoadAssetAtPath<StyleSheet>(
+                "Assets/SequenceFlow/Editor/SequenceFlowWindow.uss"
+            );
+
             rootVisualElement.styleSheets.Add(styleSheet);
 
             CreateAndAddView(styleSheet);

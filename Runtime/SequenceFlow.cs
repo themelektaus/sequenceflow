@@ -95,7 +95,7 @@ namespace Prototype.SequenceFlow
                 sequence.Exit();
 
                 if (currentState is not null)
-                    currentState = currentState.GetNext(e);
+                    currentState = currentState.GetNext(e, parameters);
 
             } while (currentState is not null);
         }

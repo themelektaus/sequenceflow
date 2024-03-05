@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 
 using UnityEditor;
 using UnityEditor.UIElements;
@@ -11,9 +10,7 @@ using UnityEngine.UIElements;
 
 namespace Prototype.SequenceFlow.Editor
 {
-    using ParameterInfo = SequenceView.ParameterInfo;
-
-    public class StatementView : VisualElement
+    public class StatementView : View
     {
         struct MethodDataBridge
         {
@@ -43,24 +40,21 @@ namespace Prototype.SequenceFlow.Editor
             }
         }
 
-        struct PopupItem
-        {
-            public int value;
-            public string name;
-
-            public override string ToString() => name;
-        }
-
-        static readonly VisualTreeAsset statementLayoutAsset = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(
-            "Assets/SequenceFlow/Editor/Statement.uxml"
+        static readonly VisualTreeAsset conditionLayoutAsset = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(
+            "Assets/SequenceFlow/Editor/StatementViewCondition.uxml"
         );
 
         public Func<Statement> getStatement;
         public Func<SerializedProperty> getSerializedStatement;
+        public SimpleData parameters;
 
         public StatementView()
         {
-            styleSheets.Add(AssetDatabase.LoadAssetAtPath<StyleSheet>("Assets/SequenceFlow/Editor/StatementView.uss"));
+            styleSheets.Add(
+                AssetDatabase.LoadAssetAtPath<StyleSheet>(
+                    "Assets/SequenceFlow/Editor/StatementView.uss"
+                )
+            );
         }
 
         public void Refresh()
@@ -77,6 +71,8 @@ namespace Prototype.SequenceFlow.Editor
             var scrollView = new ScrollView();
             Add(scrollView);
 
+            scrollView.style.maxHeight = SequenceFlowWindow.viewHeight - 120;
+
             if (statement.conditions is not null)
             {
                 var serializedConditions = serializedStatement.FindPropertyRelative("conditions");
@@ -84,7 +80,7 @@ namespace Prototype.SequenceFlow.Editor
                 {
                     var i = ArrayUtility.IndexOf(statement.conditions, condition);
                     var serializedCondition = serializedConditions.GetArrayElementAtIndex(i);
-                    var layout = statementLayoutAsset.CloneTree();
+                    var layout = conditionLayoutAsset.CloneTree();
 
                     var enabledProperty = serializedCondition.FindPropertyRelative("enabled");
                     if (!enabledProperty.boolValue)
@@ -101,7 +97,26 @@ namespace Prototype.SequenceFlow.Editor
 
                     layout.Q<EnumField>("Executer").BindProperty(serializedCondition.FindPropertyRelative("executer"));
 
-                    SetupMethodField(layout, statement, serializedCondition.FindPropertyRelative("method"), i);
+                    var bridge = SetupMethodField(layout, statement, serializedCondition.FindPropertyRelative("method"), i);
+
+                    void OnMouseUp(MouseUpEvent e)
+                    {
+                        if (e.button != 1)
+                            return;
+
+                        e.StopPropagation();
+
+                        var menu = new GenericMenu();
+                        AddMethodsToMenu(menu, "Statement/", bridge);
+                        menu.AddSeparator(string.Empty);
+                        AddContextToMenu(menu, bridge);
+                        menu.ShowAsContext();
+                    }
+
+                    layout.RegisterCallback<MouseUpEvent>(OnMouseUp);
+                    bridge.methodField.RegisterCallback<MouseUpEvent>(OnMouseUp, TrickleDown.TrickleDown);
+
+                    bridge.methodField.Q("unity-text-input").style.color = new Color(1, .75f, 0);
 
                     scrollView.Add(layout);
                 }
@@ -111,10 +126,12 @@ namespace Prototype.SequenceFlow.Editor
             button.AddToClassList("AddButton");
             button.clicked += () =>
             {
+                var condition = new StatementCondition();
+
                 if (statement.conditions is null)
-                    statement.conditions = new[] { new StatementCondition() };
+                    statement.conditions = new[] { condition };
                 else
-                    ArrayUtility.Add(ref statement.conditions, new StatementCondition());
+                    ArrayUtility.Add(ref statement.conditions, condition);
 
                 Refresh();
             };
@@ -122,7 +139,29 @@ namespace Prototype.SequenceFlow.Editor
             Add(button);
         }
 
-        void SetupMethodField(
+        void MoveUp(Statement statement, StatementCondition condition)
+        {
+            var i = ArrayUtility.IndexOf(statement.conditions, condition);
+            ArrayUtility.Remove(ref statement.conditions, condition);
+            ArrayUtility.Insert(ref statement.conditions, i - 1, condition);
+            Refresh();
+        }
+
+        void MoveDown(Statement statement, StatementCondition condition)
+        {
+            var i = ArrayUtility.IndexOf(statement.conditions, condition);
+            ArrayUtility.Remove(ref statement.conditions, condition);
+            ArrayUtility.Insert(ref statement.conditions, i + 1, condition);
+            Refresh();
+        }
+
+        void Delete(Statement statement, StatementCondition condition)
+        {
+            ArrayUtility.Remove(ref statement.conditions, condition);
+            Refresh();
+        }
+
+        MethodDataBridge SetupMethodField(
             TemplateContainer layout,
             Statement statement,
             SerializedProperty serializedMethod,
@@ -141,47 +180,9 @@ namespace Prototype.SequenceFlow.Editor
                 methodNameProperty = methodNameProperty
             };
 
-            layout.RegisterCallback<MouseUpEvent>(e =>
-            {
-                if (e.button != 1)
-                    return;
-
-                e.StopPropagation();
-            }, TrickleDown.TrickleDown);
-
-            layout.RegisterCallback<MouseDownEvent>(e =>
-            {
-                if (e.button != 1)
-                    return;
-
-                e.StopPropagation();
-
-                var menu = new GenericMenu();
-                var on = bridge.methodNameProperty.stringValue.Equals("");
-
-                menu.AddItem(new GUIContent("Statement/(None)"), on, OnMethodItemSelected, (bridge, ""));
-
-                menu.AddSeparator(string.Empty);
-
-                foreach (var definition in StatementMethodDefinition.GetDefaultInstances())
-                    AddMethodItem(bridge, menu, "Statement/", definition);
-
-                menu.AddSeparator(string.Empty);
-
-                var condition = bridge.statement.conditions[bridge.conditionIndex];
-
-                menu.AddItem(new("Move Up"), false, bridge.conditionIndex > 0 ? new GenericMenu.MenuFunction(() => MoveUp(bridge.statement, condition)) : null);
-                menu.AddItem(new("Move Down"), false, bridge.conditionIndex < bridge.statement.conditions.Length - 1 ? new GenericMenu.MenuFunction(() => MoveDown(bridge.statement, condition)) : null);
-
-                menu.AddSeparator(string.Empty);
-
-                menu.AddItem(new("Delete"), false, () => Delete(bridge.statement, condition));
-                menu.ShowAsContext();
-            });
-
-            bridge.methodField.Q("unity-text-input").style.color = new Color(1, .75f, 0);
-
             SetMethodFieldValue(ref bridge);
+
+            return bridge;
         }
 
         void SetMethodFieldValue(ref MethodDataBridge bridge)
@@ -215,28 +216,163 @@ namespace Prototype.SequenceFlow.Editor
                     continue;
                 }
 
-                var field = enumerator.CreateField(parameterInfo, out _);
-                parametersElement.Add(field);
-            }
-        }
+                SerializedProperty parameterNameProperty = null;
 
-        static IEnumerable<ParameterInfo> GetMethodParameters(FieldInfo[] fieldInfos)
-        {
-            foreach (var fieldInfo in fieldInfos)
-            {
-                yield return new()
+                var field = enumerator.CreateField(parameterInfo, out var parameterProperty);
+                if (field is null)
                 {
-                    friendlyName = Utils.StringToCamelCase(fieldInfo.Name),
-                    type = fieldInfo.FieldType,
-                    attributes = fieldInfo.GetCustomAttributes().ToArray()
-                };
+                    parameterNameProperty = parameterProperty.FindPropertyRelative("name");
+                    field = CreateParameterField(
+                        parameterInfo.friendlyName,
+                        parameterNameProperty
+                    );
+                }
+
+                parametersElement.Add(field);
+
+                if (!enumerator.typeDefinition.isLinkable)
+                    continue;
+
+                SetLinkable(
+                    methodDataBridge,
+                    field,
+                    enumerator.methodParametersProperty,
+                    enumerator.currentMethodPropertyIndex,
+                    parameterProperty,
+                    parameterInfo.type
+                );
+
+                SetupPlaceholder(
+                    parameterNameProperty,
+                    parameterInfo.type,
+                    field
+                );
             }
         }
 
-        void AddMethodItem(MethodDataBridge methodDataBridge, GenericMenu menu, string rootPath, StatementMethodDefinition definition)
+        void AddMethodsToMenu(GenericMenu menu, string rootPath, MethodDataBridge bridge)
         {
-            var on = methodDataBridge.methodNameProperty.stringValue.Equals(definition.ToString());
-            menu.AddItem(new(rootPath + definition.menuPath), on, OnMethodItemSelected, (methodDataBridge, definition.ToString()));
+            menu.AddItem(
+                new($"{rootPath}(None)"),
+                bridge.methodNameProperty.stringValue.Equals(string.Empty),
+                OnMethodItemSelected,
+                (bridge, string.Empty)
+            );
+
+            menu.AddSeparator(rootPath);
+
+            foreach (var definition in StatementMethodDefinition.GetDefaultInstances())
+                AddMethodItem(bridge, menu, rootPath, definition);
+        }
+
+        void AddContextToMenu(GenericMenu menu, MethodDataBridge bridge)
+        {
+            var condition = bridge.statement.conditions[bridge.conditionIndex];
+
+            menu.AddItem(
+                new("Move Up"),
+                false,
+                bridge.conditionIndex > 0
+                    ? new(() => MoveUp(bridge.statement, condition))
+                    : null
+            );
+
+            menu.AddItem(
+                new("Move Down"),
+                false,
+                bridge.conditionIndex < bridge.statement.conditions.Length - 1
+                    ? new(() => MoveDown(bridge.statement, condition))
+                    : null
+            );
+
+            menu.AddSeparator(string.Empty);
+
+            menu.AddItem(
+                new("Delete"),
+                false,
+                () => Delete(bridge.statement, condition)
+            );
+        }
+
+        void SetLinkable(
+            MethodDataBridge bridge,
+            VisualElement field,
+            SerializedProperty methodParameters,
+            int index,
+            SerializedProperty parameterProperty,
+            Type parameterType
+        )
+        {
+            field.RegisterCallback<MouseUpEvent>(e =>
+            {
+                if (e.button != 1)
+                    return;
+
+                e.StopPropagation();
+
+                var menu = new GenericMenu();
+
+                menu.AddItem(
+                    new("Link Parameter"),
+                    parameterProperty is not null,
+                    () =>
+                    {
+                        ToggleLink(methodParameters, index, parameterProperty);
+                        Refresh();
+                    }
+                );
+                menu.AddSeparator(string.Empty);
+
+                if (parameterProperty is not null && parameters is not null)
+                {
+                    var nameProperty = parameterProperty.FindPropertyRelative("name");
+                    foreach (var parameter in parameters)
+                    {
+                        if (!parameter.GetValueType().IsAssignableFrom(parameterType))
+                            continue;
+
+                        var name = parameter.GetName();
+
+                        menu.AddItem(
+                            new($"Linkable Parameters/{name} ({parameterType.Name})"),
+                            nameProperty.stringValue == name,
+                            () =>
+                            {
+                                nameProperty.stringValue = name;
+                                nameProperty.serializedObject.ApplyModifiedProperties();
+
+                                RefreshPlaceholder(field, name);
+                            }
+                        );
+                    }
+                }
+
+                AddMethodsToMenu(menu, "Statement/", bridge);
+
+                menu.AddSeparator(string.Empty);
+
+                AddContextToMenu(menu, bridge);
+
+                menu.ShowAsContext();
+
+            }, TrickleDown.TrickleDown);
+        }
+
+        void AddMethodItem(
+            MethodDataBridge methodDataBridge,
+            GenericMenu menu,
+            string rootPath,
+            StatementMethodDefinition definition
+        )
+        {
+            menu.AddItem(
+                new(rootPath + definition.menuPath),
+                methodDataBridge.methodNameProperty.stringValue.Equals(
+                    definition.ToString()
+                ),
+                OnMethodItemSelected,
+                (methodDataBridge, definition.ToString())
+            );
         }
 
         void OnMethodItemSelected(object x)
@@ -246,28 +382,5 @@ namespace Prototype.SequenceFlow.Editor
             y.Item1.methodNameProperty.serializedObject.ApplyModifiedProperties();
             Refresh();
         }
-
-        void MoveUp(Statement statement, StatementCondition condition)
-        {
-            var i = ArrayUtility.IndexOf(statement.conditions, condition);
-            ArrayUtility.Remove(ref statement.conditions, condition);
-            ArrayUtility.Insert(ref statement.conditions, i - 1, condition);
-            Refresh();
-        }
-        
-        void MoveDown(Statement statement, StatementCondition condition)
-        {
-            var i = ArrayUtility.IndexOf(statement.conditions, condition);
-            ArrayUtility.Remove(ref statement.conditions, condition);
-            ArrayUtility.Insert(ref statement.conditions, i + 1, condition);
-            Refresh();
-        }
-
-        void Delete(Statement statement, StatementCondition condition)
-        {
-            ArrayUtility.Remove(ref statement.conditions, condition);
-            Refresh();
-        }
-
     }
 }

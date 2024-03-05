@@ -1,17 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 
 using UnityEditor;
-using UnityEditor.UIElements;
 
 using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace Prototype.SequenceFlow.Editor
 {
-    public class SequenceView : VisualElement
+    public class SequenceView : View
     {
         struct MethodDataBridge
         {
@@ -48,7 +46,9 @@ namespace Prototype.SequenceFlow.Editor
                 }
                 else
                 {
-                    var definition = SequenceMethodDefinition.GetDefaultInstance(methodNameProperty.stringValue);
+                    var definition = SequenceMethodDefinition
+                        .GetDefaultInstance(methodNameProperty.stringValue);
+
                     if (definition is null)
                     {
                         methodField.text = methodNameProperty.stringValue;
@@ -61,7 +61,7 @@ namespace Prototype.SequenceFlow.Editor
                         var value = definition.displayName ?? definition.menuPath;
 
                         methodField.text = value.Replace("/", " → ");
-                        methodField.style.backgroundColor = new StyleColor(StyleKeyword.Null);
+                        methodField.style.backgroundColor = StyleKeyword.Null;
 
                         backgroundColor = definition.color == Color.clear
                             ? new(1, 1, 1, .08f)
@@ -70,22 +70,18 @@ namespace Prototype.SequenceFlow.Editor
                 }
 
                 var hoverColor = backgroundColor;
+
                 hoverColor.a *= 1.8f;
-                container.RegisterCallback<MouseOverEvent>(e => container.style.backgroundColor = hoverColor);
-                container.RegisterCallback<MouseOutEvent>(e => container.style.backgroundColor = backgroundColor);
+
+                container.RegisterCallback<MouseOverEvent>(
+                    e => container.style.backgroundColor = hoverColor
+                );
+
+                container.RegisterCallback<MouseOutEvent>(
+                    e => container.style.backgroundColor = backgroundColor
+                );
+
                 container.style.backgroundColor = backgroundColor;
-            }
-        }
-
-        public struct ParameterInfo
-        {
-            public string friendlyName;
-            public Type type;
-            public Attribute[] attributes;
-
-            public T GetAttribute<T>() where T : Attribute
-            {
-                return attributes.Where(x => x is T).FirstOrDefault() as T;
             }
         }
 
@@ -93,12 +89,17 @@ namespace Prototype.SequenceFlow.Editor
         public Func<SerializedProperty> getSerializedCommands;
         public SimpleData parameters;
 
-        readonly VisualTreeAsset methodLayoutAsset;
+        static readonly VisualTreeAsset commandLayoutAsset = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>(
+            "Assets/SequenceFlow/Editor/SequenceViewCommand.uxml"
+        );
 
         public SequenceView()
         {
-            methodLayoutAsset = AssetDatabase.LoadAssetAtPath<VisualTreeAsset>("Assets/SequenceFlow/Editor/Method.uxml");
-            styleSheets.Add(AssetDatabase.LoadAssetAtPath<StyleSheet>("Assets/SequenceFlow/Editor/SequenceView.uss"));
+            styleSheets.Add(
+                AssetDatabase.LoadAssetAtPath<StyleSheet>(
+                    "Assets/SequenceFlow/Editor/SequenceView.uss"
+                )
+            );
         }
 
         public void Refresh()
@@ -115,7 +116,8 @@ namespace Prototype.SequenceFlow.Editor
                 {
                     var i = ArrayUtility.IndexOf(sequence.commands, command);
                     var serializedCommand = serializedCommands.GetArrayElementAtIndex(i);
-                    var layout = methodLayoutAsset.CloneTree();
+                    var layout = commandLayoutAsset.CloneTree();
+
                     var enabledProperty = serializedCommand.FindPropertyRelative("enabled");
                     var delayProperty = serializedCommand.FindPropertyRelative("delay");
                     var postDelayProperty = serializedCommand.FindPropertyRelative("postDelay");
@@ -133,7 +135,7 @@ namespace Prototype.SequenceFlow.Editor
                         e.StopPropagation();
 
                         var menu = new GenericMenu();
-                        AddCommandsToMenu(menu, "Command/", bridge);
+                        AddMethodsToMenu(menu, "Command/", bridge);
                         menu.AddSeparator(string.Empty);
                         AddContextToMenu(menu, bridge);
                         menu.ShowAsContext();
@@ -141,6 +143,37 @@ namespace Prototype.SequenceFlow.Editor
 
                     layout.RegisterCallback<MouseUpEvent>(OnMouseUp);
                     bridge.methodField.RegisterCallback<MouseUpEvent>(OnMouseUp);
+
+                    void AddDelayElement(
+                        string menuText,
+                        string className,
+                        SerializedProperty delayProperty
+                    )
+                    {
+                        var sec = delayProperty.floatValue.ToString().Replace(',', '.');
+                        var delayLabel = new Label($"Wait {sec} sec");
+                        delayLabel.AddToClassList(className);
+                        delayLabel.RegisterCallback<MouseUpEvent>(e =>
+                        {
+                            if (e.button != 1)
+                                return;
+
+                            e.StopPropagation();
+
+                            var menu = new GenericMenu();
+
+                            menu.AddItem(new GUIContent("Remove " + menuText), false, () =>
+                            {
+                                delayProperty.floatValue = 0;
+                                delayProperty.serializedObject.ApplyModifiedProperties();
+                                Refresh();
+                            });
+
+                            menu.ShowAsContext();
+                        });
+
+                        Add(delayLabel);
+                    }
 
                     if (delayProperty.floatValue > 0)
                         AddDelayElement("Pre-Delay", "pre-delay", delayProperty);
@@ -188,46 +221,19 @@ namespace Prototype.SequenceFlow.Editor
 
             var button = new Button { text = "↳ Command" };
             button.AddToClassList("AddButton");
-            button.clicked += () => AddCommand(sequence);
-            Add(button);
-        }
-
-        void AddDelayElement(string menuText, string className, SerializedProperty delayProperty)
-        {
-            var delayLabel = new Label("Wait " + delayProperty.floatValue.ToString().Replace(',', '.') + " sec");
-            delayLabel.AddToClassList(className);
-            delayLabel.RegisterCallback<MouseUpEvent>(e =>
+            button.clicked += () =>
             {
-                if (e.button != 1)
-                    return;
+                var command = new SequenceCommand();
 
-                e.StopPropagation();
+                if (sequence.commands is null)
+                    sequence.commands = new[] { command };
+                else
+                    ArrayUtility.Add(ref sequence.commands, command);
 
-                var menu = new GenericMenu();
+                Refresh();
+            };
 
-                menu.AddItem(new GUIContent("Remove " + menuText), false, () =>
-                {
-                    delayProperty.floatValue = 0;
-                    delayProperty.serializedObject.ApplyModifiedProperties();
-                    Refresh();
-                });
-
-                menu.ShowAsContext();
-            });
-
-            Add(delayLabel);
-        }
-
-        void AddCommand(Sequence sequence)
-        {
-            var command = new SequenceCommand();
-
-            if (sequence.commands is null)
-                sequence.commands = new[] { command };
-            else
-                ArrayUtility.Add(ref sequence.commands, command);
-
-            Refresh();
+            Add(button);
         }
 
         void MoveUp(Sequence sequence, SequenceCommand command)
@@ -289,87 +295,6 @@ namespace Prototype.SequenceFlow.Editor
             return bridge;
         }
 
-        void AddCommandsToMenu(GenericMenu menu, string rootPath, MethodDataBridge bridge)
-        {
-            var on = bridge.methodNameProperty.stringValue.Equals(string.Empty);
-
-            menu.AddItem(new GUIContent(rootPath + "(None)"), on, OnMethodItemSelected, (bridge, string.Empty));
-            menu.AddSeparator(rootPath);
-
-            foreach (var definition in SequenceMethodDefinition.GetDefaultInstances())
-                AddMethodItem(bridge, menu, rootPath, definition);
-        }
-
-        void AddContextToMenu(GenericMenu menu, MethodDataBridge bridge)
-        {
-            var command = bridge.sequence.commands[bridge.commandIndex];
-            var enabledProperty = bridge.serializedCommand.FindPropertyRelative("enabled");
-            var executerProperty = bridge.serializedCommand.FindPropertyRelative("executer");
-            var flowProperty = bridge.serializedCommand.FindPropertyRelative("flow");
-
-            menu.AddItem(new("Enabled"), enabledProperty.boolValue, () =>
-            {
-                enabledProperty.boolValue = !enabledProperty.boolValue;
-                enabledProperty.serializedObject.ApplyModifiedProperties();
-                Refresh();
-            });
-
-            var executerIsActivator = executerProperty.enumValueIndex == 1;
-            menu.AddItem(new("Execute as Activator"), executerIsActivator, () =>
-            {
-                executerProperty.enumValueIndex = executerIsActivator ? 0 : 1;
-                executerProperty.serializedObject.ApplyModifiedProperties();
-                Refresh();
-            });
-
-            if (bridge.IsWaitable())
-            {
-                menu.AddItem(new("Async"), flowProperty.enumValueIndex == 1, () =>
-                {
-                    flowProperty.enumValueIndex = flowProperty.enumValueIndex == 1 ? 0 : 1;
-                    executerProperty.serializedObject.ApplyModifiedProperties();
-                    Refresh();
-                });
-
-                menu.AddItem(new("Async (Forced)"), flowProperty.enumValueIndex == 2, () =>
-                {
-                    flowProperty.enumValueIndex = flowProperty.enumValueIndex == 2 ? 0 : 2;
-                    executerProperty.serializedObject.ApplyModifiedProperties();
-                    Refresh();
-                });
-            }
-
-            menu.AddSeparator(string.Empty);
-
-            AddContextToMenu_Delay(menu, bridge, "Pre-Delay", "delay");
-            AddContextToMenu_Delay(menu, bridge, "Post-Delay", "postDelay");
-
-            menu.AddSeparator(string.Empty);
-
-            menu.AddItem(new("Move Up"), false, bridge.commandIndex > 0 ? new GenericMenu.MenuFunction(() => MoveUp(bridge.sequence, command)) : null);
-            menu.AddItem(new("Move Down"), false, bridge.commandIndex < bridge.sequence.commands.Length - 1 ? new GenericMenu.MenuFunction(() => MoveDown(bridge.sequence, command)) : null);
-
-            menu.AddSeparator(string.Empty);
-
-            menu.AddItem(new("Delete"), false, () => Delete(bridge.sequence, command));
-        }
-
-        void AddContextToMenu_Delay(GenericMenu menu, MethodDataBridge bridge, string menuText, string relativePropertyPath)
-        {
-            var delayProperty = bridge.serializedCommand.FindPropertyRelative(relativePropertyPath);
-
-            foreach (var delay in new[] { .05f, .1f, .15f, .2f, .25f, .5f, .75f, 1, 2, 3, 5, 8 })
-            {
-                var sec = delay.ToString("0.00").Replace(',', '.');
-                menu.AddItem(new GUIContent($"{menuText}/{sec} sec"), Mathf.Approximately(delayProperty.floatValue, delay), () =>
-                {
-                    delayProperty.floatValue = delay;
-                    delayProperty.serializedObject.ApplyModifiedProperties();
-                    Refresh();
-                });
-            }
-        }
-
         void SetMethodFieldValue(ref MethodDataBridge bridge)
         {
             bridge.sequenceMethodDefinition = SequenceMethodDefinition.GetDefaultInstance(bridge.methodNameProperty.stringValue);
@@ -427,52 +352,114 @@ namespace Prototype.SequenceFlow.Editor
                     parameterInfo.type
                 );
 
-                if (parameterNameProperty is null)
-                    continue;
-
-                var textInput = field.Q("unity-text-input");
-
-                var typeName = parameterInfo.type.FullName switch
-                {
-                    "System.Int32" => "Integer",
-                    "System.Single" => "Float",
-                    "UnityEngine.Object" => "Object",
-                    _ => parameterInfo.type.Name
-                };
-
-                var placeholder = new Label(typeName) { name = "placeholder" };
-                placeholder.style.position = Position.Absolute;
-                placeholder.style.left = 3;
-                placeholder.style.minWidth = StyleKeyword.None;
-                placeholder.style.color = Color.gray;
-                textInput.Add(placeholder);
-
-                RefreshPlaceholder(field, parameterNameProperty.stringValue);
-
-                var textInputText = textInput.GetType().GetProperty("text");
-                textInput.RegisterCallback<InputEvent>(
-                    e => RefreshPlaceholder(
-                        field,
-                        textInputText.GetValue(textInput) as string
-                    )
+                SetupPlaceholder(
+                    parameterNameProperty,
+                    parameterInfo.type,
+                    field
                 );
             }
         }
 
-        void RefreshPlaceholder(VisualElement field, string text)
+        void AddMethodsToMenu(GenericMenu menu, string rootPath, MethodDataBridge bridge)
         {
-            field.Q("placeholder").style.display
-                = string.IsNullOrEmpty(text)
-                    ? DisplayStyle.Flex
-                    : DisplayStyle.None;
+            menu.AddItem(
+                new($"{rootPath}(None)"),
+                bridge.methodNameProperty.stringValue.Equals(string.Empty),
+                OnMethodItemSelected,
+                (bridge, string.Empty)
+            );
+
+            menu.AddSeparator(rootPath);
+
+            foreach (var definition in SequenceMethodDefinition.GetDefaultInstances())
+                AddMethodItem(bridge, menu, rootPath, definition);
         }
 
-        static VisualElement CreateParameterField(string parameterName, SerializedProperty parameterNameProperty)
+        void AddContextToMenu(GenericMenu menu, MethodDataBridge bridge)
         {
-            var field = new TextField(parameterName);
-            field.AddToClassList("linked");
-            field.BindProperty(parameterNameProperty);
-            return field;
+            var command = bridge.sequence.commands[bridge.commandIndex];
+            var enabledProperty = bridge.serializedCommand.FindPropertyRelative("enabled");
+            var executerProperty = bridge.serializedCommand.FindPropertyRelative("executer");
+            var flowProperty = bridge.serializedCommand.FindPropertyRelative("flow");
+
+            menu.AddItem(new("Enabled"), enabledProperty.boolValue, () =>
+            {
+                enabledProperty.boolValue = !enabledProperty.boolValue;
+                enabledProperty.serializedObject.ApplyModifiedProperties();
+                Refresh();
+            });
+
+            var executerIsActivator = executerProperty.enumValueIndex == 1;
+            menu.AddItem(new("Execute as Activator"), executerIsActivator, () =>
+            {
+                executerProperty.enumValueIndex = executerIsActivator ? 0 : 1;
+                executerProperty.serializedObject.ApplyModifiedProperties();
+                Refresh();
+            });
+
+            if (bridge.IsWaitable())
+            {
+                menu.AddItem(new("Async"), flowProperty.enumValueIndex == 1, () =>
+                {
+                    flowProperty.enumValueIndex = flowProperty.enumValueIndex == 1 ? 0 : 1;
+                    executerProperty.serializedObject.ApplyModifiedProperties();
+                    Refresh();
+                });
+
+                menu.AddItem(new("Async (Forced)"), flowProperty.enumValueIndex == 2, () =>
+                {
+                    flowProperty.enumValueIndex = flowProperty.enumValueIndex == 2 ? 0 : 2;
+                    executerProperty.serializedObject.ApplyModifiedProperties();
+                    Refresh();
+                });
+            }
+
+            menu.AddSeparator(string.Empty);
+
+            AddContextToMenu_Delay(menu, bridge, "Pre-Delay", "delay");
+            AddContextToMenu_Delay(menu, bridge, "Post-Delay", "postDelay");
+
+            menu.AddSeparator(string.Empty);
+
+            menu.AddItem(
+                new("Move Up"),
+                false,
+                bridge.commandIndex > 0
+                    ? new(() => MoveUp(bridge.sequence, command))
+                    : null
+            );
+
+            menu.AddItem(
+                new("Move Down"),
+                false,
+                bridge.commandIndex < bridge.sequence.commands.Length - 1
+                    ? new(() => MoveDown(bridge.sequence, command))
+                    : null
+            );
+
+            menu.AddSeparator(string.Empty);
+
+            menu.AddItem(
+                new("Delete"),
+                false,
+                () => Delete(bridge.sequence, command)
+            );
+        }
+
+        void AddContextToMenu_Delay(GenericMenu menu, MethodDataBridge bridge, string menuText, string relativePropertyPath)
+        {
+            var delayProperty = bridge.serializedCommand.FindPropertyRelative(relativePropertyPath);
+
+            foreach (var delay in new[] { .05f, .1f, .15f, .2f, .25f, .5f, .75f, 1, 2, 3, 5, 8 })
+            {
+                var sec = delay.ToString("0.00").Replace(',', '.');
+                menu.AddItem(new GUIContent($"{menuText}/{sec} sec"), Mathf.Approximately(delayProperty.floatValue, delay), () =>
+                {
+                    delayProperty.floatValue = delay;
+                    delayProperty.serializedObject.ApplyModifiedProperties();
+                    Refresh();
+                });
+            }
         }
 
         void SetLinkable(
@@ -494,7 +481,7 @@ namespace Prototype.SequenceFlow.Editor
                 var menu = new GenericMenu();
 
                 menu.AddItem(
-                    new GUIContent("Link Parameter"),
+                    new("Link Parameter"),
                     parameterProperty is not null,
                     () =>
                     {
@@ -515,7 +502,7 @@ namespace Prototype.SequenceFlow.Editor
                         var name = parameter.GetName();
 
                         menu.AddItem(
-                            new GUIContent($"Linkable Parameters/{name} ({parameterType.Name})"),
+                            new($"Linkable Parameters/{name} ({parameterType.Name})"),
                             nameProperty.stringValue == name,
                             () =>
                             {
@@ -528,7 +515,7 @@ namespace Prototype.SequenceFlow.Editor
                     }
                 }
 
-                AddCommandsToMenu(menu, "Command/", bridge);
+                AddMethodsToMenu(menu, "Command/", bridge);
 
                 menu.AddSeparator(string.Empty);
 
@@ -539,46 +526,21 @@ namespace Prototype.SequenceFlow.Editor
             }, TrickleDown.TrickleDown);
         }
 
-        static void ToggleLink(SerializedProperty methodParameters, int index, SerializedProperty parameterProperty)
+        void AddMethodItem(
+            MethodDataBridge methodDataBridge,
+            GenericMenu menu,
+            string rootPath,
+            SequenceMethodDefinition definition
+        )
         {
-            if (parameterProperty is null)
-            {
-                methodParameters.InsertArrayElementAtIndex(methodParameters.arraySize);
-
-                var newParameter = methodParameters.GetArrayElementAtIndex(methodParameters.arraySize - 1);
-                newParameter.FindPropertyRelative("index").intValue = index;
-            }
-            else
-            {
-                for (int i = 0; i < methodParameters.arraySize; i++)
-                {
-                    if (methodParameters.GetArrayElementAtIndex(i).FindPropertyRelative("index").intValue == index)
-                    {
-                        methodParameters.DeleteArrayElementAtIndex(i);
-                        break;
-                    }
-                }
-            }
-            methodParameters.serializedObject.ApplyModifiedProperties();
-        }
-
-        static IEnumerable<ParameterInfo> GetMethodParameters(FieldInfo[] fieldInfos)
-        {
-            foreach (var fieldInfo in fieldInfos)
-            {
-                yield return new()
-                {
-                    friendlyName = Utils.StringToCamelCase(fieldInfo.Name),
-                    type = fieldInfo.FieldType,
-                    attributes = fieldInfo.GetCustomAttributes().ToArray()
-                };
-            }
-        }
-
-        void AddMethodItem(MethodDataBridge methodDataBridge, GenericMenu menu, string rootPath, SequenceMethodDefinition definition)
-        {
-            var on = methodDataBridge.methodNameProperty.stringValue.Equals(definition.ToString());
-            menu.AddItem(new(rootPath + definition.menuPath), on, OnMethodItemSelected, (methodDataBridge, definition.ToString()));
+            menu.AddItem(
+                new(rootPath + definition.menuPath),
+                methodDataBridge.methodNameProperty.stringValue.Equals(
+                    definition.ToString()
+                ),
+                OnMethodItemSelected,
+                (methodDataBridge, definition.ToString())
+            );
         }
 
         void OnMethodItemSelected(object x)
@@ -588,11 +550,13 @@ namespace Prototype.SequenceFlow.Editor
             var identifier = y.Item2;
             y.Item1.methodNameProperty.stringValue = identifier;
 
-            var definition = SequenceMethodDefinition.GetDefaultInstance(identifier);
+            var definition = SequenceMethodDefinition
+                .GetDefaultInstance(identifier);
 
             if (definition is not null)
             {
-                var instance = Activator.CreateInstance(definition.GetType()) as SequenceMethodDefinition;
+                var instance = Activator.CreateInstance(definition.GetType())
+                    as SequenceMethodDefinition;
 
                 var method = y.Item1.serializedMethod;
 
@@ -612,34 +576,39 @@ namespace Prototype.SequenceFlow.Editor
                     if (value is bool boolValue)
                     {
                         arrayProperty = method.FindPropertyRelative("bools");
-                        arrayProperty.GetArrayElementAtIndex(boolsIndex++).boolValue = boolValue;
+                        arrayProperty.GetArrayElementAtIndex(boolsIndex++)
+                            .boolValue = boolValue;
                         continue;
                     }
 
                     if (value is int intValue)
                     {
                         arrayProperty = method.FindPropertyRelative("ints");
-                        arrayProperty.GetArrayElementAtIndex(intsIndex++).intValue = intValue;
+                        arrayProperty.GetArrayElementAtIndex(intsIndex++)
+                            .intValue = intValue;
                         continue;
                     }
 
                     if (value is float floatValue)
                     {
                         arrayProperty = method.FindPropertyRelative("floats");
-                        arrayProperty.GetArrayElementAtIndex(floatsIndex++).floatValue = floatValue;
+                        arrayProperty.GetArrayElementAtIndex(floatsIndex++)
+                            .floatValue = floatValue;
                         continue;
                     }
 
                     if (value is string stringValue)
                     {
                         arrayProperty = method.FindPropertyRelative("strings");
-                        arrayProperty.GetArrayElementAtIndex(stringsIndex++).stringValue = stringValue;
+                        arrayProperty.GetArrayElementAtIndex(stringsIndex++)
+                            .stringValue = stringValue;
                         continue;
                     }
                 }
             }
 
-            y.Item1.methodNameProperty.serializedObject.ApplyModifiedProperties();
+            y.Item1.methodNameProperty.serializedObject
+                .ApplyModifiedProperties();
 
             Refresh();
         }

@@ -9,7 +9,7 @@ namespace Prototype.SequenceFlow
         [NonSerialized] StatementMethodDefinition definition = null;
         [NonSerialized] bool definitionInitialized = false;
 
-        public bool Invoke(Statement statement)
+        public bool Invoke(Statement statement, SimpleData parameters)
         {
             if (!definitionInitialized)
             {
@@ -23,13 +23,13 @@ namespace Prototype.SequenceFlow
                 if (method is not null)
                 {
                     var types = method.GetParameters().Select(x => x.ParameterType);
-                    return (bool) method.Invoke(statement, GetParameters(types, null));
+                    return (bool) method.Invoke(statement, GetParameters(types, parameters));
                 }
             }
             else
             {
                 var types = definition.fieldInfos.Select(x => x.FieldType);
-                return definition.Invoke(statement, GetParameters(types, null));
+                return definition.Invoke(statement, GetParameters(types, parameters));
             }
 
             return false;

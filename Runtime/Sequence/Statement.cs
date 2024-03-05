@@ -16,17 +16,19 @@ namespace Prototype.SequenceFlow
         public MonoBehaviour owner { get; private set; }
         public Transform executer { get; private set; }
         public EventArgs e { get; private set; }
+        public SimpleData parameters { get; private set; }
 
         public Statement()
         {
 
         }
 
-        public bool Check(Transform activator, MonoBehaviour owner, EventArgs e)
+        public bool Check(Transform activator, MonoBehaviour owner, EventArgs e, SimpleData parameters)
         {
             this.activator = activator;
             this.owner = owner;
             this.e = e;
+            this.parameters = parameters;
 
             if (conditions is null)
                 return true;
@@ -43,7 +45,7 @@ namespace Prototype.SequenceFlow
                     ? activator
                     : owner.transform;
 
-                var conditionResult = condition.method.Invoke(this);
+                var conditionResult = condition.method.Invoke(this, parameters);
                 if (conditionResult)
                     trueCounter++;
 

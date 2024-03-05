@@ -268,7 +268,8 @@ namespace Prototype.SequenceFlow.Editor
                     var serializedSequenceFlowObject = new SerializedObject(transition.sequenceFlow.sequenceFlowObject);
                     var serializedTransitionStatements = serializedSequenceFlowObject.FindProperty("transitionStatements");
                     return serializedTransitionStatements.GetArrayElementAtIndex(transition.GetStatementIndex());
-                }
+                },
+                parameters = SequenceFlowWindow.parameters
             };
 
             statementView.Refresh();

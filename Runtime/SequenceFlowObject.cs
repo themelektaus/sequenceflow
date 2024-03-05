@@ -1,7 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 
+#if UNITY_EDITOR
+using UnityEditor.SceneManagement;
+#endif
+
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 namespace Prototype.SequenceFlow
 {
@@ -50,7 +55,7 @@ namespace Prototype.SequenceFlow
         }
 
 #if UNITY_EDITOR
-        public bool WriteToData(bool saveAssets = false)
+        public bool WriteToData(Scene scene)
         {
             if (sequenceFlow.states.Any(x => x.sequenceFlow is null))
                 return false;
@@ -64,8 +69,8 @@ namespace Prototype.SequenceFlow
 
             UnityEditor.EditorUtility.SetDirty(this);
 
-            if (saveAssets)
-                UnityEditor.AssetDatabase.SaveAssets();
+            if (scene.handle != 0)
+                EditorSceneManager.MarkSceneDirty(scene);
 
             return true;
         }

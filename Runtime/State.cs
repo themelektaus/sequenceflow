@@ -50,7 +50,7 @@ namespace Prototype.SequenceFlow
             return sequenceFlow.transitions.Where(x => x.source == this);
         }
 
-        public State GetNext(EventArgs e)
+        public State GetNext(EventArgs e, SimpleData parameters)
         {
             var transitions = sequenceFlow.transitions.Where(t =>
             {
@@ -61,7 +61,7 @@ namespace Prototype.SequenceFlow
                     if (statement is null)
                         return true;
 
-                    if (statement.Check(sequenceFlow.activator, sequenceFlow.owner, e))
+                    if (statement.Check(sequenceFlow.activator, sequenceFlow.owner, e, parameters))
                         return true;
                 }
 

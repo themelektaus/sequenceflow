@@ -6,8 +6,8 @@
 }
 
 StatementView > ScrollView {
-    max-height: 440px;
     margin: 3px 0;
+    min-width: 200px;
 }
 
 StatementView > ScrollView #unity-content-viewport {
@@ -74,6 +74,23 @@ StatementView > ScrollView TemplateContainer.disabled {
 #Parameters .unity-base-field Label {
     -unity-text-align: middle-right;
     margin-right: 10px;
+    min-width: 80px;
+}
+
+#Parameters .unity-base-field.linked {
+    background-color: rgba(0, 105, 105, .5);
+    border-width: 0.5px;
+    border-color: rgba(0, 255, 255, .25);
+    border-radius: 3px;
+    padding: 3px 3px 3px 0;
+}
+
+#Parameters .unity-base-field.linked > Label {
+    margin-left: -1px;
+}
+
+#Parameters .linked .unity-base-field__input {
+    color: rgba(0, 255, 255, 1);
 }
 
 #Executer {

@@ -15,7 +15,6 @@ namespace Prototype.SequenceFlow
         public MonoBehaviour owner { get; private set; }
         public Transform executer { get; private set; }
         public EventArgs e { get; private set; }
-
         public SimpleData parameters { get; private set; }
 
         public class Data
@@ -81,7 +80,6 @@ namespace Prototype.SequenceFlow
             this.activator = activator;
             this.owner = owner;
             this.e = e;
-
             this.parameters = parameters;
 
             coroutine = owner.StartCoroutine(StartCommands());
