@@ -33,18 +33,7 @@ namespace Prototype.SequenceFlow.Editor
                 p2.width = 20;
 
                 if (GUI.Button(p1, "Edit"))
-                {
-                    var target = property.serializedObject.targetObject;
-                    var parameters = target.GetType().GetField("parameters");
-
-                    if (target is Interpreter interpreter)
-                        SequenceFlowWindow.scene = interpreter.gameObject.scene;
-
-                    if (parameters.GetValue(target) is SimpleData simpleData)
-                        SequenceFlowWindow.parameters = simpleData;
-
-                    SequenceFlowWindow.Open(sequenceFlowObject);
-                }
+                    Edit(property.serializedObject.targetObject, sequenceFlowObject);
 
                 if (sequenceFlowObject.embeddedInPrefab)
                 {
@@ -116,6 +105,24 @@ namespace Prototype.SequenceFlow.Editor
             }
 
             return true;
+        }
+
+        public static void Edit(SequenceFlowInterpreter interpreter)
+        {
+            Edit(interpreter, interpreter.sequenceFlowObject);
+        }
+
+        static void Edit(object target, SequenceFlowObject sequenceFlowObject)
+        {
+            var parameters = target.GetType().GetField("parameters");
+
+            if (target is Interpreter interpreter)
+                SequenceFlowWindow.scene = interpreter.gameObject.scene;
+
+            if (parameters.GetValue(target) is SimpleData simpleData)
+                SequenceFlowWindow.parameters = simpleData;
+
+            SequenceFlowWindow.Open(sequenceFlowObject);
         }
     }
 }

@@ -171,7 +171,9 @@ namespace Prototype.SequenceFlow.Editor
                 {
                     var color = GUI.color;
                     GUI.color = new(1, 1, 1, .5f);
-                    GUI.Label(FixedPosition(p, 2, 130, false), getPlaceholder(value));
+                    var labelPosition = FixedPosition(p, 2, 130, false);
+                    labelPosition.y += 3;
+                    GUI.Label(labelPosition, getPlaceholder(value));
                     GUI.color = color;
                 }
 

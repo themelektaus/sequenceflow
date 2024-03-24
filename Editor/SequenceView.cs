@@ -496,13 +496,19 @@ namespace Prototype.SequenceFlow.Editor
                     var nameProperty = parameterProperty.FindPropertyRelative("name");
                     foreach (var parameter in parameters)
                     {
-                        if (!parameter.GetValueType().IsAssignableFrom(parameterType))
+                        var valueType = parameter.GetValueType();
+
+                        if (!parameterType.IsAssignableFrom(valueType))
                             continue;
 
                         var name = parameter.GetName();
 
+                        var itemName = $"[{valueType.Name}]";
+                        if (name != string.Empty)
+                            itemName += $" {name}";
+
                         menu.AddItem(
-                            new($"Linkable Parameters/{name} ({parameterType.Name})"),
+                            new($"Linkable Parameters/{itemName}"),
                             nameProperty.stringValue == name,
                             () =>
                             {

@@ -53,7 +53,7 @@ namespace Prototype.SequenceFlow
             public string name;
             public UnityEngine.Object value;
             public string GetName() => name;
-            public Type GetValueType() => typeof(UnityEngine.Object);
+            public Type GetValueType() => value ? value.GetType() : typeof(UnityEngine.Object);
             public object GetValue() => value;
 
         }

@@ -1,5 +1,5 @@
 ﻿using System;
-
+using System.Linq;
 using UnityEditor;
 using UnityEditor.UIElements;
 
@@ -85,7 +85,7 @@ namespace Prototype.SequenceFlow.Editor
                 Debug.Log("Sequence Flow has been saved");
         }
 
-        public void OnEnable()
+        void OnEnable()
         {
             RefreshLayout();
         }
@@ -104,19 +104,76 @@ namespace Prototype.SequenceFlow.Editor
 
             var toolbar = new Toolbar();
 
+            toolbar.Add(
+                new ToolbarButton(() =>
+                {
+                    var field = GetSequenceFlowObjectField();
+
+                    var menu = new GenericMenu();
+
+                    var assets = AssetDatabase.FindAssets($"t:{typeof(SequenceFlowObject).FullName}")
+                        .Select(AssetDatabase.GUIDToAssetPath)
+                        .Select(AssetDatabase.LoadAssetAtPath<SequenceFlowObject>);
+
+                    menu.AddItem(new("Refresh"), false, () => Open(sequenceFlowObject));
+                    menu.AddItem(new(""), false, null);
+
+                    menu.AddItem(new("Load Assets"), false, null);
+                    foreach (var x in assets)
+                    {
+                        menu.AddItem(
+                            new($"{x.name}"),
+                            field.value == x,
+                            x =>
+                            {
+                                var y = x as SequenceFlowObject;
+                                Selection.activeObject = y;
+                                EditorGUIUtility.PingObject(y);
+                                Open(y);
+                            },
+                            x
+                        );
+                    }
+
+                    menu.AddItem(new(""), false, null);
+                    menu.AddItem(new("Load Embedded"), false, null);
+
+                    var interpreters = FindObjectsByType<SequenceFlowInterpreter>(
+                        FindObjectsInactive.Include,
+                        FindObjectsSortMode.None
+                    );
+
+                    foreach (var x in interpreters)
+                    {
+                        menu.AddItem(
+                            new($"{x.gameObject.scene.name}/{x.name}"),
+                            field.value == x.sequenceFlowObject,
+                            x =>
+                            {
+                                var y = x as SequenceFlowInterpreter;
+                                Selection.activeGameObject = y.gameObject;
+                                EditorGUIUtility.PingObject(y);
+                                if (y.sequenceFlowObject)
+                                    SequenceFlowObjectDrawer.Edit(y);
+                            },
+                            x
+                        );
+                    }
+                    menu.ShowAsContext();
+                })
+                {
+                    text = "File",
+                    focusable = false
+                }
+            );
+
+            toolbar.Add(new ToolbarSpacer { style = { flexGrow = 1 } });
+
             toolbar.Add(new ObjectField
             {
                 name = "SequenceFlowObject",
                 allowSceneObjects = false
             });
-
-            toolbar.Add(
-                new Button(() => Open(sequenceFlowObject))
-                {
-                    text = "Refresh",
-                    focusable = false
-                }
-            );
 
             rootVisualElement.Add(toolbar);
 
@@ -124,13 +181,17 @@ namespace Prototype.SequenceFlow.Editor
             if (field is null)
                 return;
 
-            field.value = sequenceFlowObject;
-            field.RegisterValueChangedCallback(e =>
+            void OnChange(UnityEngine.Object value)
             {
-                Load(e.newValue as SequenceFlowObject);
+                var sequenceFlowObject = value as SequenceFlowObject;
+                Load(sequenceFlowObject);
                 CreateAndAddView(styleSheet);
                 _view.Refresh(sequenceFlowObject ? sequenceFlowObject.sequenceFlow : null);
-            });
+            }
+
+            field.RegisterValueChangedCallback(e => OnChange(e.newValue));
+
+            OnChange(null);
         }
 
         void CreateAndAddView(StyleSheet styleSheet)
