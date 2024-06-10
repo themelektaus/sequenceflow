@@ -1,9 +1,6 @@
-using System;
-
 using UnityEditor;
 using UnityEditor.UIElements;
 
-using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace Prototype.SequenceFlow.Editor
@@ -16,13 +13,13 @@ namespace Prototype.SequenceFlow.Editor
         protected override string methodsPropertyName => "objects";
         protected override int methodsCapacity => 2;
 
-        protected override bool Match(SequenceView.ParameterInfo parameterInfo)
+        protected override bool Match(View.ParameterInfo parameterInfo)
         {
             return typeof(UnityEngine.Object).IsAssignableFrom(parameterInfo.type);
         }
 
         protected override VisualElement OnCreateField(
-            SequenceView.ParameterInfo parameterInfo,
+            View.ParameterInfo parameterInfo,
             SerializedProperty property
         )
         {

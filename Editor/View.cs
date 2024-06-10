@@ -46,7 +46,7 @@ namespace Prototype.SequenceFlow.Editor
 
             var placeholder = new Label(typeName) { name = "placeholder" };
             placeholder.style.position = Position.Absolute;
-            placeholder.style.left = 3;
+            placeholder.style.left = 2;
             placeholder.style.minWidth = StyleKeyword.None;
             placeholder.style.color = Color.gray;
             textInput.Add(placeholder);

@@ -116,7 +116,7 @@ namespace Prototype.SequenceFlow.Editor
 
             var rect = FixedPosition(position, 0, 130, false);
 
-            if (GUI.Button(rect, "Add Parameter ...", new GUIStyle(GUI.skin.button)))
+            if (GUI.Button(rect, "Add Parameter", new GUIStyle(GUI.skin.button)))
             {
                 var menu = new GenericMenu();
                 menu.AddItem(new("Boolean"), false, () => AddValue(property, "bools"));
@@ -172,7 +172,7 @@ namespace Prototype.SequenceFlow.Editor
                     var color = GUI.color;
                     GUI.color = new(1, 1, 1, .5f);
                     var labelPosition = FixedPosition(p, 2, 130, false);
-                    labelPosition.y += 3;
+                    labelPosition.y += 1;
                     GUI.Label(labelPosition, getPlaceholder(value));
                     GUI.color = color;
                 }

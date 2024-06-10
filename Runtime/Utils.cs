@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEditor;
+
 using UnityEngine;
 using UnityEngine.UIElements;
 
-
 #if UNITY_EDITOR
-using EditorGUI = UnityEditor.EditorGUI;
 using IMGUIContainer = UnityEngine.UIElements.IMGUIContainer;
 #endif
 
@@ -128,55 +126,55 @@ namespace Prototype.SequenceFlow
 
         public static bool Equals(int a, StatementType type, int b)
         {
-            switch (type)
+            return type switch
             {
-                case StatementType.Equals: return a == b;
-                case StatementType.NotEquals: return a != b;
-                case StatementType.GreaterThan: return a > b;
-                case StatementType.GreaterEqualsThan: return a >= b;
-                case StatementType.LessThan: return a < b;
-                case StatementType.LessEqualsThan: return a <= b;
-            }
-            return false;
+                StatementType.Equals => a == b,
+                StatementType.NotEquals => a != b,
+                StatementType.GreaterThan => a > b,
+                StatementType.GreaterEqualsThan => a >= b,
+                StatementType.LessThan => a < b,
+                StatementType.LessEqualsThan => a <= b,
+                _ => false,
+            };
         }
 
         public static bool Equals(float a, StatementType type, float b)
         {
-            switch (type)
+            return type switch
             {
-                case StatementType.Equals: return a == b;
-                case StatementType.NotEquals: return a != b;
-                case StatementType.GreaterThan: return a > b;
-                case StatementType.GreaterEqualsThan: return a >= b;
-                case StatementType.LessThan: return a < b;
-                case StatementType.LessEqualsThan: return a <= b;
-            }
-            return false;
+                StatementType.Equals => a == b,
+                StatementType.NotEquals => a != b,
+                StatementType.GreaterThan => a > b,
+                StatementType.GreaterEqualsThan => a >= b,
+                StatementType.LessThan => a < b,
+                StatementType.LessEqualsThan => a <= b,
+                _ => false,
+            };
         }
 
         public static bool Equals(string a, StringStatementType type, string b)
         {
-            switch (type)
+            return type switch
             {
-                case StringStatementType.Equals: return a == b;
-                case StringStatementType.NotEquals: return a != b;
-                case StringStatementType.StartsWith: return a.StartsWith(b);
-                case StringStatementType.EndsWith: return a.EndsWith(b);
-                case StringStatementType.StartMatch: return b.StartsWith(a);
-                case StringStatementType.EndMatch: return b.EndsWith(a);
-                case StringStatementType.LengthEquals: return a.Length == int.Parse(b);
-            }
-            return false;
+                StringStatementType.Equals => a == b,
+                StringStatementType.NotEquals => a != b,
+                StringStatementType.StartsWith => a.StartsWith(b),
+                StringStatementType.EndsWith => a.EndsWith(b),
+                StringStatementType.StartMatch => b.StartsWith(a),
+                StringStatementType.EndMatch => b.EndsWith(a),
+                StringStatementType.LengthEquals => a.Length == int.Parse(b),
+                _ => false,
+            };
         }
 
         public static bool Equals(UnityEngine.Object a, ObjectStatementType type, UnityEngine.Object b)
         {
-            switch (type)
+            return type switch
             {
-                case ObjectStatementType.Equals: return a == b;
-                case ObjectStatementType.NotEquals: return a != b;
-            }
-            return false;
+                ObjectStatementType.Equals => a == b,
+                ObjectStatementType.NotEquals => a != b,
+                _ => false,
+            };
         }
 
 #if UNITY_EDITOR
@@ -231,7 +229,7 @@ namespace Prototype.SequenceFlow
 
             var result = GetCache<Texture2D>(key);
 
-            if (result is null)
+            if (!result)
             {
                 result = CreateTexture(
                     Color.clear,

@@ -1,9 +1,7 @@
 using UnityEditor;
 
-using UnityEngine;
 using UnityEngine.UIElements;
 
-using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -18,11 +16,11 @@ namespace Prototype.SequenceFlow.Editor
         public bool isLinkable => methodParametersPropertyName is not null;
 
         protected abstract bool Match(
-            SequenceView.ParameterInfo parameterInfo
+            View.ParameterInfo parameterInfo
         );
 
         protected abstract VisualElement OnCreateField(
-            SequenceView.ParameterInfo parameterInfo,
+            View.ParameterInfo parameterInfo,
             SerializedProperty property
         );
 
@@ -41,7 +39,7 @@ namespace Prototype.SequenceFlow.Editor
 
             readonly List<Enumerator> items = new();
 
-            public Enumerator Get(SequenceView.ParameterInfo parameterInfo)
+            public Enumerator Get(View.ParameterInfo parameterInfo)
             {
                 return items.FirstOrDefault(x => x.typeDefinition.Match(parameterInfo));
             }
@@ -99,7 +97,7 @@ namespace Prototype.SequenceFlow.Editor
             }
 
             public VisualElement CreateField(
-                SequenceView.ParameterInfo parameterInfo,
+                View.ParameterInfo parameterInfo,
                 out SerializedProperty parameterProperty
             )
             {

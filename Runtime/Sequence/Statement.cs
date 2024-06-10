@@ -11,7 +11,6 @@ namespace Prototype.SequenceFlow
         public LogicGate logicGate;
         public StatementCondition[] conditions;
 
-
         public Transform activator { get; private set; }
         public MonoBehaviour owner { get; private set; }
         public Transform executer { get; private set; }

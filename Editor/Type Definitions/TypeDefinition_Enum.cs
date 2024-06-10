@@ -1,9 +1,7 @@
 using System;
 
 using UnityEditor;
-using UnityEditor.UIElements;
 
-using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace Prototype.SequenceFlow.Editor
@@ -14,13 +12,13 @@ namespace Prototype.SequenceFlow.Editor
         protected override string methodsPropertyName => "enums";
         protected override int methodsCapacity => 2;
 
-        protected override bool Match(SequenceView.ParameterInfo parameterInfo)
+        protected override bool Match(View.ParameterInfo parameterInfo)
         {
             return parameterInfo.type.IsEnum;
         }
 
         protected override VisualElement OnCreateField(
-            SequenceView.ParameterInfo parameterInfo,
+            View.ParameterInfo parameterInfo,
             SerializedProperty property
         )
         {
@@ -53,6 +51,5 @@ namespace Prototype.SequenceFlow.Editor
 
             public override string ToString() => name;
         }
-
     }
 }
