@@ -154,6 +154,7 @@ SequenceView > TemplateContainer.disabled {
 
 #Parameters .unity-base-field__input {
     min-width: 60px;
+    max-width: unset;
 }
 
 #Parameters .unity-base-field.linked {

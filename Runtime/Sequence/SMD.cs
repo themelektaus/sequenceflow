@@ -1,13 +1,7 @@
-﻿using System.Collections.Generic;
-
-using UnityEngine;
-
-namespace Prototype.SequenceFlow
+﻿namespace Prototype.SequenceFlow
 {
     public abstract class SMD : SequenceMethodDefinition
     {
-        static readonly Dictionary<MonoBehaviour, object> dataCache = new();
-
         public sealed override bool waitable => false;
 
         public void Invoke(Sequence sequence, object[] parameters)

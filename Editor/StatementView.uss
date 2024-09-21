@@ -24,6 +24,14 @@ StatementView > ScrollView TemplateContainer {
     border-bottom-color: rgba(255, 255, 255, 0.15);
 }
 
+StatementView #Method {
+    flex-shrink: 1;
+}
+
+StatementView #Method TextElement {
+    padding-right: 7px;
+}
+
 StatementView > ScrollView TemplateContainer.disabled {
     opacity: 0.625;
 }

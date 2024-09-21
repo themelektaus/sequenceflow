@@ -57,6 +57,7 @@ namespace Prototype.SequenceFlow
         protected MonoBehaviour owner => statement.owner;
         protected Transform executer => statement.executer;
         protected EventArgs e => statement.e;
+        protected Object GetOrExecuter(in Object @object) => @object ? @object : executer;
 
         protected string GetNameCombinedWithScene(string name)
         {

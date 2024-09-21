@@ -29,7 +29,7 @@ namespace Prototype.SequenceFlow.Editor
 
         public static bool OnGUI(Rect position, SerializedProperty property, GUIContent label, GlobalStringAttribute attribute)
         {
-            var key = $"t:{attribute.Type.Name} \"{attribute.Name}\"";
+            var key = $"t:{nameof(GlobalStrings)} \"{attribute.Name}\"";
 
             if (!globalStringsCache.TryGetValue(key, out var globalStrings))
             {
@@ -42,7 +42,7 @@ namespace Prototype.SequenceFlow.Editor
 
                 if (!globalStrings)
                 {
-                    globalStrings = ScriptableObject.CreateInstance(attribute.Type) as GlobalStrings;
+                    globalStrings = ScriptableObject.CreateInstance<GlobalStrings>();
                     AssetDatabase.CreateAsset(globalStrings, $"Assets/{attribute.Name}.asset");
                     AssetDatabase.Refresh();
                 }
@@ -69,7 +69,7 @@ namespace Prototype.SequenceFlow.Editor
             position.y += EditorGUI.GetPropertyHeight(property, _label, true) + 2;
 
             int index = -1;
-            var allStrings = globalStrings.GetAllStrings(true);
+            var allStrings = globalStrings.EnumerateAllStrings(includeNew: true).ToArray();
 
             var stringValue = property.stringValue;
 

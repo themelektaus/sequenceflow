@@ -136,16 +136,22 @@ namespace Prototype.SequenceFlow.Editor
                         );
                     }
 
-                    menu.AddItem(new(""), false, null);
-                    menu.AddItem(new("Load Embedded"), false, null);
-
                     var interpreters = FindObjectsByType<SequenceFlowInterpreter>(
                         FindObjectsInactive.Include,
                         FindObjectsSortMode.None
                     );
 
+                    menu.AddItem(new(""), false, null);
+                    menu.AddItem(new("Load From Scene"), false, null);
+
                     foreach (var x in interpreters)
                     {
+                        if (!x.sequenceFlowObject)
+                            continue;
+
+                        if (x.sequenceFlowObject.embeddedInScene)
+                            continue;
+
                         menu.AddItem(
                             new($"{x.gameObject.scene.name}/{x.name}"),
                             field.value == x.sequenceFlowObject,
@@ -154,12 +160,37 @@ namespace Prototype.SequenceFlow.Editor
                                 var y = x as SequenceFlowInterpreter;
                                 Selection.activeGameObject = y.gameObject;
                                 EditorGUIUtility.PingObject(y);
-                                if (y.sequenceFlowObject)
-                                    SequenceFlowObjectDrawer.Edit(y);
+                                SequenceFlowObjectDrawer.Edit(y);
                             },
                             x
                         );
                     }
+
+                    menu.AddItem(new(""), false, null);
+                    menu.AddItem(new("Load Embedded"), false, null);
+
+                    foreach (var x in interpreters)
+                    {
+                        if (!x.sequenceFlowObject)
+                            continue;
+
+                        if (!x.sequenceFlowObject.embeddedInScene)
+                            continue;
+
+                        menu.AddItem(
+                            new($" {x.gameObject.scene.name}/{x.name}"),
+                            field.value == x.sequenceFlowObject,
+                            x =>
+                            {
+                                var y = x as SequenceFlowInterpreter;
+                                Selection.activeGameObject = y.gameObject;
+                                EditorGUIUtility.PingObject(y);
+                                SequenceFlowObjectDrawer.Edit(y);
+                            },
+                            x
+                        );
+                    }
+
                     menu.ShowAsContext();
                 })
                 {

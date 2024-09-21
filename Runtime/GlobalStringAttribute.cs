@@ -6,12 +6,10 @@ namespace Prototype.SequenceFlow
 {
     public class GlobalStringAttribute : PropertyAttribute
     {
-        public Type Type;
         public string Name;
 
-        public GlobalStringAttribute(Type type, string name)
+        public GlobalStringAttribute(string name)
         {
-            Type = type;
             Name = name;
         }
     }

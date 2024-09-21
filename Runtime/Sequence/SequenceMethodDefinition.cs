@@ -64,6 +64,7 @@ namespace Prototype.SequenceFlow
         protected MonoBehaviour owner => sequence.owner;
         protected Transform executer => sequence.executer;
         protected EventArgs e => sequence.e;
+        protected Object GetOrExecuter(in Object @object) => @object ? @object : executer;
 
         protected void Prepare(Sequence sequence, object[] parameters)
         {
