@@ -10,7 +10,7 @@ using UnityEngine.SceneManagement;
 
 namespace Prototype.SequenceFlow
 {
-    [CreateAssetMenu]
+    [CreateAssetMenu(menuName = "Prototype/Sequence Flow Object")]
     public class SequenceFlowObject : ScriptableObject
     {
         public bool embeddedInScene;

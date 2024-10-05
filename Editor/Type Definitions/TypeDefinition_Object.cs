@@ -11,7 +11,7 @@ namespace Prototype.SequenceFlow.Editor
 
         protected override string methodParametersPropertyName => "objectParameters";
         protected override string methodsPropertyName => "objects";
-        protected override int methodsCapacity => 2;
+        protected override int methodsCapacity => 3;
 
         protected override bool Match(View.ParameterInfo parameterInfo)
         {

@@ -2,7 +2,7 @@
 
 namespace Prototype.SequenceFlow
 {
-    [AddComponentMenu("")]
+    [AddComponentMenu("/")]
     [DisallowMultipleComponent]
     public class SimpleDataComponent : MonoBehaviour
     {

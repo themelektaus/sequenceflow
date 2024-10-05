@@ -14,7 +14,7 @@ using System.Text;
 
 namespace Prototype.SequenceFlow
 {
-    [CreateAssetMenu]
+    [CreateAssetMenu(menuName = "Prototype/Global Strings")]
     public class GlobalStrings : ScriptableObject
     {
         [SerializeField]

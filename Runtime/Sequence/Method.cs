@@ -225,11 +225,13 @@ namespace Prototype.SequenceFlow
 
         void AddObject(List<object> result, System.Type type, ref int objectsIndex, SimpleData parameters)
         {
+            Object value;
+
             if (parameters is not null)
             {
                 foreach (var objectParameter in objectParameters)
                 {
-                    if (objectParameter.index == objectsIndex && parameters.TryGetObject(objectParameter.name, type, out var value))
+                    if (objectParameter.index == objectsIndex && parameters.TryGetObject(objectParameter.name, type, out value))
                     {
                         objectsIndex++;
                         result.Add(value);
@@ -238,7 +240,8 @@ namespace Prototype.SequenceFlow
                 }
             }
 
-            result.Add(objects[objectsIndex++]);
+            value = objects[objectsIndex++];
+            result.Add(value ? value : default);
         }
     }
 }
